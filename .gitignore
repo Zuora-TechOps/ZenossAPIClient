@@ -1,0 +1,16 @@
+# Created by .ignore support plugin (hsz.mobi)
+### disco default .gitignore template
+# IntelliJ project files
+.idea
+*.iml
+out
+gen
+
+# macOS
+.DS_Store
+
+# Python
+*.pyc
+*.egg-info
+/dist
+/docs/_build/*
