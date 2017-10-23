@@ -495,7 +495,7 @@ class DeviceRouter(ZenossRouter):
         for dc in device_classes_data['deviceClasses']:
             if len(dc['name']) == 0 or dc['name'] == '/':
                 continue
-            dc_list.append('Devices{}'.format(dc['name']))
+            dc_list.append('Devices{0}'.format(dc['name']))
 
         return dc_list
 
@@ -698,7 +698,7 @@ class ZenossDeviceClass(DeviceRouter):
             devices=[]
         )
         for device in device_data['devices']:
-            device_list['devices'].append(self._get_device_by_uid(device['uid']))
+            device_list['devices'].append(self._get_device_by_uid(device['uid'].replace('/zport/dmd/', '', 1)))
 
         return device_list
 
@@ -942,9 +942,16 @@ class ZenossDevice(DeviceRouter):
         components_list = self.list_components(meta_type=meta_type, start=start, limit=limit, sort=sort, dir=dir, name=name)
 
         components = []
-        for component in components_list:
+        for component in components_list['components']:
             c_info = self._get_info_by_uid('{0}/{1}'.format(self.uid, component))
-            components.append(self.api_url, self.api_headers, self.ssl_verify, c_info)
+            components.append(
+                ZenossComponent(
+                    self.api_url,
+                    self.api_headers,
+                    self.ssl_verify,
+                    c_info['data']
+                )
+            )
 
         return components
 
@@ -958,7 +965,14 @@ class ZenossDevice(DeviceRouter):
         Returns:
             ZenossComponent:
         """
-        return self._get_info_by_uid('{0}/{1}'.format(self.uid, component))
+        c_info = self._get_info_by_uid('{0}/{1}'.format(self.uid, component))
+
+        return ZenossComponent(
+            self.api_url,
+            self.api_headers,
+            self.ssl_verify,
+            c_info['data']
+        )
 
     def list_user_commands(self):
         """
