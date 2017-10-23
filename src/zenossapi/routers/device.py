@@ -1107,7 +1107,7 @@ class ZenossDevice(DeviceRouter):
         for t in templates_data:
             templates.append(dict(
                 name=t['uid'].split('/')[-1],
-                label=t['label'])
+                label=t['text'])
             )
 
         return templates
@@ -1129,8 +1129,9 @@ class ZenossDevice(DeviceRouter):
         templates = []
         tr = TemplateRouter(self.api_url, self.api_headers, self.ssl_verify)
         for t in templates_data:
+            tuid = t['uid'].replace('/zport/dmd/', '', 1)
             templates.append(
-                tr._get_template_by_uid(t['uid'])
+                tr._get_template_by_uid(tuid)
             )
 
         return templates
@@ -1238,7 +1239,11 @@ class ZenossDevice(DeviceRouter):
                     path = ''
                 else:
                     path = m.groups()[0]
-                uid = 'Devices{0}/rrdTemplates/{1}'.format(path, t['name'])
+                if path.endswith(self.name):
+                    path = path.replace(self.name, 'devices/{0}'.format(self.name))
+                    uid = 'Devices{0}/{1}'.format(path, t['name'])
+                else:
+                    uid = 'Devices{0}/rrdTemplates/{1}'.format(path, t['name'])
                 templates.append(
                     tr._get_template_by_uid(uid)
                 )
@@ -1298,7 +1303,7 @@ class ZenossDevice(DeviceRouter):
         tr = TemplateRouter(self.api_url, self.api_headers, self.ssl_verify)
         for t in template_data['data']:
             templates.append(
-                tr._get_template_by_uid(t['uid'])
+                tr._get_template_by_uid(t['uid'].replace('/zport/dmd/', '', 1))
             )
 
         return templates
