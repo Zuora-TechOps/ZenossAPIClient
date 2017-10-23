@@ -51,7 +51,7 @@ class Client(object):
         for router in self.get_routers():
             self.router_list.append(router)
             self.routers[router] = __import__(
-                'sretools.monitoring.Zenoss.routers.{0}'.format(router),
+                'zenossapi.routers.{0}'.format(router),
                 fromlist=[router])
 
         if self.api_user and password:
