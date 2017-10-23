@@ -24,6 +24,13 @@ setup(name=name,
               'release': ('setup.py', release),
           }
       },
+      setup_requires=[
+          'pytest-runner>=2.12.1',
+      ],
+      tests_require=[
+          'pytest>=3.2.3',
+          'pytest-responses>=0.3.0',
+      ],
       install_requires=[
           'python-dateutil>=2.6.1',
           'requests>=2.18.4',
