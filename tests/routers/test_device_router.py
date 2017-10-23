@@ -1,7 +1,9 @@
 import json
 import pytest
+import responses as responses_redux
 from zenossapi.apiclient import ZenossAPIClientError
 from zenossapi.routers.device import DeviceRouter, ZenossDeviceClass, ZenossDevice, ZenossComponent
+from zenossapi.routers.template import ZenossTemplate
 import resp_json
 
 pytest_plugins = "pytest-responses"
@@ -36,6 +38,16 @@ def request_callback(request):
             return resp_json.dev_info
         elif rdata['uid'] == "Devices/Server/TEST/devices/test.example.com/hw/cpus/0":
             return resp_json.component_info
+        elif rdata['uid'] == "Devices/Server/TEST/devices/test.example.com/DnsMonitor":
+            return resp_json.local_template
+        elif rdata['uid'] == "Devices/Server/TEST/rrdTemplates/Device":
+            return resp_json.device_template
+        elif rdata['uid'] == "Devices/rrdTemplates/DnsMonitor":
+            return resp_json.dns_template
+        elif rdata['uid'] == "Devices/Server/rrdTemplates/Apache":
+            return resp_json.apache_template
+        elif rdata['uid'] == "Devices/Server/rrdTemplates/DigMonitor":
+            return resp_json.dig_template
         else:
             return resp_json.not_found
 
@@ -48,8 +60,29 @@ def request_callback(request):
     def getDevices(rdata):
         return resp_json.devices
 
+    def addDevice(rdata):
+        return resp_json.add_dev
+
     def getComponents(rdata):
         return resp_json.components
+
+    def getUserCommands(rdata):
+        return resp_json.uc
+
+    def getLocalTemplates(rdata):
+        return resp_json.local_templates
+
+    def getTemplates(rdata):
+        return resp_json.templates
+
+    def getUnboundTemplates(rdata):
+        return resp_json.ub_templates
+    
+    def getBoundTemplates(rdata):
+        return resp_json.bound_templates
+
+    def getOverridableTemplates(rdata):
+        return resp_json.or_templates
 
     method = locals()[rdata['method']]
     resp_body = method(rdata['data'][0])
@@ -143,6 +176,14 @@ class TestDeviceRouter(object):
         assert isinstance(resp, ZenossDevice)
         assert resp.uid == "Devices/Server/TEST/devices/test.example.com"
 
+    def test_device_router_add_device(self, responses):
+        responses_callback(responses)
+
+        dr = DeviceRouter(url, headers, True)
+        dc = dr.get_device_class('Server/TEST')
+        resp = dc.add_device('test2.example.com')
+        assert resp == "721739ae-2b1d-4613-91e9-681f134a2c49"
+
     def test_device_router_list_components(self, responses):
         responses_callback(responses)
 
@@ -173,3 +214,166 @@ class TestDeviceRouter(object):
         assert resp.uid == "Devices/Server/TEST/devices/test.example.com/hw/cpus/0"
         assert resp.meta_type == "CPU"
         assert resp.name == "0"
+
+    def test_device_router_list_user_commands(self, responses):
+        responses_callback(responses)
+
+        dr = DeviceRouter(url, headers, True)
+        dc = dr.get_device_class('Server/TEST')
+        d = dc.get_device('test.example.com')
+        resp = d.list_user_commands()
+        assert len(resp) == 6
+        assert resp[2]['name'] == "ping"
+
+    def test_device_router_list_local_templates(self, responses):
+        responses_callback(responses)
+
+        dr = DeviceRouter(url, headers, True)
+        dc = dr.get_device_class('Server/TEST')
+        d = dc.get_device('test.example.com')
+        resp = d.list_local_templates()
+        assert resp[0] == "DnsMonitor"
+
+    def test_device_router_get_local_templates(self, responses):
+        responses.assert_all_requests_are_fired = False
+        responses.add(
+            responses.POST,
+            '{0}/template_router'.format(url),
+            json=resp_json.local_template,
+            status=200,
+        )
+        responses.add_callback(
+            responses.POST,
+            '{0}/device_router'.format(url),
+            callback=request_callback,
+            content_type='application/json',
+        )
+        dr = DeviceRouter(url, headers, True)
+        dc = dr.get_device_class('Server/TEST')
+        d = dc.get_device('test.example.com')
+        resp = d.get_local_templates()
+        assert isinstance(resp[0], ZenossTemplate)
+        assert resp[0].uid == "Devices/Server/TEST/devices/test.example.com/DnsMonitor"
+
+    def test_device_router_list_active_templates(self, responses):
+        responses_callback(responses)
+
+        dr = DeviceRouter(url, headers, True)
+        dc = dr.get_device_class('Server/TEST')
+        d = dc.get_device('test.example.com')
+        resp = d.list_active_templates()
+        assert resp[0]['name'] == "Device"
+
+    def test_device_router_get_active_templates(self, responses):
+        responses.assert_all_requests_are_fired = False
+        responses.add_callback(
+            responses.POST,
+            '{0}/template_router'.format(url),
+            callback=request_callback,
+            content_type='application/json',
+        )
+        responses.add_callback(
+            responses.POST,
+            '{0}/device_router'.format(url),
+            callback=request_callback,
+            content_type='application/json',
+        )
+        dr = DeviceRouter(url, headers, True)
+        dc = dr.get_device_class('Server/TEST')
+        d = dc.get_device('test.example.com')
+        resp = d.get_active_templates()
+        assert len(resp) == 2
+        assert isinstance(resp[0], ZenossTemplate)
+        assert resp[0].uid == "Devices/Server/TEST/rrdTemplates/Device"
+
+    def test_device_router_list_unbound_templates(self, responses):
+        responses_callback(responses)
+
+        dr = DeviceRouter(url, headers, True)
+        dc = dr.get_device_class('Server/TEST')
+        d = dc.get_device('test.example.com')
+        resp = d.list_unbound_templates()
+        assert resp[0]['name'] == "Apache"
+
+    def test_device_router_get_unbound_templates(self, responses):
+        responses.assert_all_requests_are_fired = False
+        responses.add_callback(
+            responses.POST,
+            '{0}/template_router'.format(url),
+            callback=request_callback,
+            content_type='application/json',
+        )
+        responses.add_callback(
+            responses.POST,
+            '{0}/device_router'.format(url),
+            callback=request_callback,
+            content_type='application/json',
+        )
+        dr = DeviceRouter(url, headers, True)
+        dc = dr.get_device_class('Server/TEST')
+        d = dc.get_device('test.example.com')
+        resp = d.get_unbound_templates()
+        assert len(resp) == 2
+        assert isinstance(resp[0], ZenossTemplate)
+        assert resp[0].uid == "Devices/Server/rrdTemplates/Apache"
+        assert resp[1].name == "DigMonitor"
+
+    def test_device_router_list_bound_templates(self, responses):
+        responses_callback(responses)
+
+        dr = DeviceRouter(url, headers, True)
+        dc = dr.get_device_class('Server/TEST')
+        d = dc.get_device('test.example.com')
+        resp = d.list_bound_templates()
+        assert resp[0]['name'] == "Device"
+        
+    def test_device_router_get_bound_templates(self, responses):
+        responses.assert_all_requests_are_fired = False
+        responses.add_callback(
+            responses.POST,
+            '{0}/template_router'.format(url),
+            callback=request_callback,
+            content_type='application/json',
+        )
+        responses.add_callback(
+            responses.POST,
+            '{0}/device_router'.format(url),
+            callback=request_callback,
+            content_type='application/json',
+        )
+        dr = DeviceRouter(url, headers, True)
+        dc = dr.get_device_class('Server/TEST')
+        d = dc.get_device('test.example.com')
+        resp = d.get_bound_templates()
+        assert len(resp) == 2
+        assert isinstance(resp[0], ZenossTemplate)
+
+    def test_device_router_list_overridable_templates(self, responses):
+        responses_callback(responses)
+
+        dr = DeviceRouter(url, headers, True)
+        dc = dr.get_device_class('Server/TEST')
+        d = dc.get_device('test.example.com')
+        resp = d.list_overridable_templates()
+        assert resp[0]['name'] == "Device"
+
+    def test_device_router_get_overridable_templates(self, responses):
+        responses.assert_all_requests_are_fired = False
+        responses.add_callback(
+            responses.POST,
+            '{0}/template_router'.format(url),
+            callback=request_callback,
+            content_type='application/json',
+        )
+        responses.add_callback(
+            responses.POST,
+            '{0}/device_router'.format(url),
+            callback=request_callback,
+            content_type='application/json',
+        )
+        dr = DeviceRouter(url, headers, True)
+        dc = dr.get_device_class('Server/TEST')
+        d = dc.get_device('test.example.com')
+        resp = d.get_overridable_templates()
+        assert len(resp) == 1
+        assert isinstance(resp[0], ZenossTemplate)

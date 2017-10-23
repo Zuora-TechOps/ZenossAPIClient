@@ -841,3 +841,336 @@ component_info = {
     "type": "rpc",
     "method": "getInfo"
 }
+
+add_dev = {
+    "uuid": "d18bb6b3-023b-407f-9775-a9fbcaa49901",
+    "action": "DeviceRouter",
+    "result": {
+        "new_jobs": [
+            {
+                "uuid": "721739ae-2b1d-4613-91e9-681f134a2c49",
+                "description": "Create test2.example.com under /Server/TEST",
+                "uid": "/zport/dmd/JobManager"
+            }
+        ],
+        "success": True
+    },
+    "tid": 1,
+    "type": "rpc",
+    "method": "addDevice"
+}
+
+uc = {
+    "uuid": "b93045d7-409b-4d2e-9acf-e9c1dd0fdcb2",
+    "action": "DeviceRouter",
+    "result": [
+        {
+            "id": "DNS forward",
+            "description": "Name to IP address lookup",
+            "uid": "/zport/dmd/userCommands/DNS forward"
+        },
+        {
+            "id": "DNS reverse",
+            "description": "IP address to name lookup",
+            "uid": "/zport/dmd/userCommands/DNS reverse"
+        },
+        {
+            "id": "ping",
+            "description": "Is the device responding to ping?",
+            "uid": "/zport/dmd/userCommands/ping"
+        },
+        {
+            "id": "snmpwalk",
+            "description": "Display the OIDs available on a device",
+            "uid": "/zport/dmd/userCommands/snmpwalk"
+        },
+        {
+            "id": "snmpwalk_v3",
+            "description": "snmp version v3 Display the OIDs available on a device",
+            "uid": "/zport/dmd/userCommands/snmpwalk_v3"
+        },
+        {
+            "id": "traceroute",
+            "description": "Show the route to the device",
+            "uid": "/zport/dmd/userCommands/traceroute"
+        }
+    ],
+    "tid": 1,
+    "type": "rpc",
+    "method": "getUserCommands"
+}
+
+local_templates = {
+    "uuid": "c68b8966-2653-4491-9555-be78255a2585",
+    "action": "DeviceRouter",
+    "result": {
+        "data": [
+            {
+                "uid": "/zport/dmd/Devices/Server/TEST/devices/test.example.com/DnsMonitor",
+                "label": "DnsMonitor (Locally Defined)"
+            }
+        ],
+        "success": True
+    },
+    "tid": 1,
+    "type": "rpc",
+    "method": "getLocalTemplates"
+}
+
+local_template = {
+    "uuid": "966435e6-2c93-482d-be23-8ea20fbd5f6d",
+    "action": "TemplateRouter",
+    "result": {
+        "data": {
+            "qtip": "Perform a DNS forward lookup of the device name and check to see that it resolves to the device's manageIp",
+            "definition": "/Devices/Server/TEST/devices/test.example.com",
+            "hidden": False,
+            "leaf": True,
+            "description": "Perform a DNS forward lookup of the device name and check to see that it resolves to the device's manageIp",
+            "name": "DnsMonitor",
+            "text": "/Server/TEST/test.example.com",
+            "id": "DnsMonitor..Server.TEST.test.example.com",
+            "meta_type": "RRDTemplate",
+            "targetPythonClass": "Products.ZenModel.Device",
+            "inspector_type": "RRDTemplate",
+            "iconCls": "tree-template-icon-bound",
+            "children": [],
+            "uid": "/zport/dmd/Devices/Server/TEST/devices/test.example.com/DnsMonitor"
+        },
+        "success": True,
+        "form": {
+            "items": [
+                {
+                    "items": [],
+                    "xtype": "fieldset"
+                }
+            ]
+        }
+    },
+    "tid": 1,
+    "type": "rpc",
+    "method": "getInfo"
+}
+
+templates = {
+    "uuid": "0398d95e-dc4b-45ee-8327-881169e8193e",
+    "action": "DeviceRouter",
+    "result": [
+        {
+            "uid": "/zport/dmd/Devices/Server/TEST/rrdTemplates/Device",
+            "path": "/Server/TEST",
+            "leaf": True,
+            "id": "/zport/dmd/Devices/Server/TEST/rrdTemplates/Device",
+            "text": "Device (/Server/TEST)"
+        },
+        {
+            "uid": "/zport/dmd/Devices/Server/TEST/devices/test.example.com/DnsMonitor",
+            "path": "Locally Defined",
+            "leaf": True,
+            "id": "/zport/dmd/Devices/Server/TEST/devices/test.example.com/DnsMonitor",
+            "text": "DnsMonitor (Locally Defined)"
+        }
+    ],
+    "tid": 1,
+    "type": "rpc",
+    "method": "getTemplates"
+}
+
+dns_template = {
+    "uuid": "d11158e2-1a57-44cc-b301-64f38edb4829",
+    "action": "TemplateRouter",
+    "result": {
+        "data": {
+            "qtip": "Perform a DNS forward lookup of the device name and check to see that it resolves to the device's manageIp",
+            "definition": "/Devices",
+            "hidden": False,
+            "leaf": True,
+            "description": "Perform a DNS forward lookup of the device name and check to see that it resolves to the device's manageIp",
+            "name": "DnsMonitor",
+            "text": "/",
+            "id": "DnsMonitor..",
+            "meta_type": "RRDTemplate",
+            "targetPythonClass": "Products.ZenModel.Device",
+            "inspector_type": "RRDTemplate",
+            "iconCls": "tree-node-no-icon",
+            "children": [],
+            "uid": "/zport/dmd/Devices/rrdTemplates/DnsMonitor"
+        },
+        "success": True,
+        "form": {
+            "items": [
+                {
+                    "items": [],
+                    "xtype": "fieldset"
+                }
+            ]
+        }
+    },
+    "tid": 1,
+    "type": "rpc",
+    "method": "getInfo"
+}
+
+device_template = {
+    "uuid": "75f49b81-f655-4425-a5a9-e166483b1641",
+    "action": "TemplateRouter",
+    "result": {
+        "data": {
+            "qtip": "Linux device monitoring via SSH.",
+            "definition": "/Devices/Server/TEST",
+            "hidden": False,
+            "leaf": True,
+            "description": "Linux device monitoring via SSH.",
+            "name": "Device",
+            "text": "/Server/TEST",
+            "id": "Device..Server.TEST",
+            "meta_type": "RRDTemplate",
+            "targetPythonClass": "Products.ZenModel.Device",
+            "inspector_type": "RRDTemplate",
+            "iconCls": "tree-template-icon-bound",
+            "children": [],
+            "uid": "/zport/dmd/Devices/Server/TEST/rrdTemplates/Device"
+        },
+        "success": True,
+        "form": {
+            "items": [
+                {
+                    "items": [],
+                    "xtype": "fieldset"
+                }
+            ]
+        }
+    },
+    "tid": 1,
+    "type": "rpc",
+    "method": "getInfo"
+}
+
+ub_templates = {
+    "uuid": "15131180-9037-4b7b-a9cc-fb754ab7978e",
+    "action": "DeviceRouter",
+    "result": {
+        "data": [
+            [
+                "Apache",
+                "Apache (/Server)"
+            ],
+            [
+                "DigMonitor",
+                "DigMonitor (/Server)"
+            ]
+        ],
+        "success": True
+    },
+    "tid": 1,
+    "type": "rpc",
+    "method": "getUnboundTemplates"
+}
+
+apache_template = {
+    "uuid": "88c860ce-5141-4947-a9e3-61533fcdf09c",
+    "action": "TemplateRouter",
+    "result": {
+        "data": {
+            "qtip": "Apache metrics via mod_status",
+            "definition": "/Devices/Server",
+            "hidden": False,
+            "leaf": True,
+            "description": "Apache metrics via mod_status",
+            "name": "Apache",
+            "text": "/Server",
+            "id": "Apache..Server",
+            "meta_type": "RRDTemplate",
+            "targetPythonClass": "Products.ZenModel.Device",
+            "inspector_type": "RRDTemplate",
+            "iconCls": "tree-node-no-icon",
+            "children": [],
+            "uid": "/zport/dmd/Devices/Server/rrdTemplates/Apache"
+        },
+        "success": True,
+        "form": {
+            "items": [
+                {
+                    "items": [],
+                    "xtype": "fieldset"
+                }
+            ]
+        }
+    },
+    "tid": 1,
+    "type": "rpc",
+    "method": "getInfo"
+}
+
+dig_template = {
+    "uuid": "19a53446-490f-48f9-a12c-7f1aa7949f91",
+    "action": "TemplateRouter",
+    "result": {
+        "data": {
+            "qtip": "DNS query time template with 30 second threshold",
+            "definition": "/Devices/Server",
+            "hidden": False,
+            "leaf": True,
+            "description": "DNS query time template with 30 second threshold",
+            "name": "DigMonitor",
+            "text": "/Server",
+            "id": "DigMonitor..Server",
+            "meta_type": "RRDTemplate",
+            "targetPythonClass": "Products.ZenModel.Device",
+            "inspector_type": "RRDTemplate",
+            "iconCls": "tree-node-no-icon",
+            "children": [],
+            "uid": "/zport/dmd/Devices/Server/rrdTemplates/DigMonitor"
+        },
+        "success": True,
+        "form": {
+            "items": [
+                {
+                    "items": [],
+                    "xtype": "fieldset"
+                }
+            ]
+        }
+    },
+    "tid": 1,
+    "type": "rpc",
+    "method": "getInfo"
+}
+
+bound_templates = {
+    "uuid": "1ba75e4e-5702-4820-96a7-fe2d3e4b859a",
+    "action": "DeviceRouter",
+    "result": {
+        "data": [
+            [
+                "Device",
+                "Device (/Server/TEST)"
+            ],
+            [
+                "DnsMonitor",
+                "DnsMonitor (/Server/TEST/test.example.com)"
+            ]
+        ],
+        "success": True
+    },
+    "tid": 1,
+    "type": "rpc",
+    "method": "getBoundTemplates"
+}
+
+or_templates = {
+    "uuid": "de5fd36b-8f0c-487a-9cc1-4a8ba7444bd9",
+    "action": "DeviceRouter",
+    "result": {
+        "data": [
+            {
+                "uid": "/zport/dmd/Devices/Server/TEST/rrdTemplates/Device",
+                "label": "Device (/Server/TEST)"
+            }
+        ],
+        "success": True
+    },
+    "tid": 1,
+    "type": "rpc",
+    "method": "getOverridableTemplates"
+}
