@@ -14,3 +14,4 @@ gen
 *.egg-info
 /dist
 /docs/_build/*
+/.cache
