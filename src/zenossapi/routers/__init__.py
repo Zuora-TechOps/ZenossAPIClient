@@ -40,7 +40,7 @@ class ZenossRouter(object):
             if response.url.find('login_form') > -1:
                 raise ZenossAPIClientAuthenticationError('API Login Failed')
             response_json = response.json()
-            if response_json['result']:
+            if 'result' in response_json:
                 if 'success' in response_json['result']:
                     if not response_json['result']['success']:
                         raise ZenossAPIClientError('Request failed: {}'.format(response_json['result']['msg']))
