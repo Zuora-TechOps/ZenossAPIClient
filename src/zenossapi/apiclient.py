@@ -66,7 +66,8 @@ class Client(object):
             list:
         """
         router_list = []
-        routers_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'routers')
+        routers_path = os.path.join(
+            os.path.dirname(os.path.abspath(__file__)), 'routers')
         file_list = os.listdir(routers_path)
         for fname in file_list:
             name, ext = fname.split('.')

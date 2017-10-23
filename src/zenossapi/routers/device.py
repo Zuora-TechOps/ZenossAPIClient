@@ -250,7 +250,7 @@ class DeviceRouter(ZenossRouter):
         Returns:
             str: Response message
         """
-        if not production_state in self.prod_states_by_value:
+        if production_state not in self.prod_states_by_value:
             raise ZenossAPIClientError(
                 'Production state {0} is not a valid option'.format(
                     production_state))
@@ -279,7 +279,7 @@ class DeviceRouter(ZenossRouter):
         Returns:
             str: Response message
         """
-        if not priority in self.priorities_by_value:
+        if priority not in self.priorities_by_value:
             raise ZenossAPIClientError(
                 "Priority {0} is not a valid option".format(
                     priority
@@ -349,7 +349,7 @@ class DeviceRouter(ZenossRouter):
             del_events (bool): Remove all events for the devices
             del_perf (bool): Remove all perf data for the devices
         """
-        if not action in ['remove', 'delete']:
+        if action not in ['remove', 'delete']:
             raise ZenossAPIClientError(
                 "Delete action must be either 'remove' or 'delete'"
             )
@@ -1387,7 +1387,8 @@ class ZenossDevice(DeviceRouter):
             str: Response message
         """
         return self._lock_devices_by_uid([self.uid], updates=updates,
-               deletion=deletion, send_event=send_event)
+                                         deletion=deletion,
+                                         send_event=send_event)
 
     def lock_for_updates(self, send_event=False):
         """
@@ -1499,6 +1500,7 @@ class ZenossDevice(DeviceRouter):
 
         return response_data['jobId']
 
+
 class ZenossComponent(DeviceRouter):
     """
     Class for Zenoss component objects
@@ -1509,7 +1511,7 @@ class ZenossComponent(DeviceRouter):
 
         unneeded_props = ['class_label', 'class_plural_label',
                           'class_plural_short_label', 'class_short_label',
-                          'inspector_type', 'uuid',]
+                          'inspector_type', 'uuid']
 
         for i in unneeded_props:
             if i in device_data:
@@ -1562,7 +1564,8 @@ class ZenossComponent(DeviceRouter):
             str: Response message
         """
         return self._lock_components_by_uid([self.uid], updates=updates,
-                                         deletion=deletion, send_event=send_event)
+                                            deletion=deletion,
+                                            send_event=send_event)
 
     def lock_for_updates(self, send_event=False):
         """
@@ -1596,4 +1599,3 @@ class ZenossComponent(DeviceRouter):
             str: Response message
         """
         return self._delete_components_by_uid([self.uid])
-
