@@ -26,6 +26,7 @@ setup(name=name,
       },
       setup_requires=[
           'pytest-runner>=2.12.1',
+          'Sphinx>=1.6.4',
       ],
       tests_require=[
           'pytest>=3.2.3',
