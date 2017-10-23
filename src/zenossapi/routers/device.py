@@ -1027,7 +1027,7 @@ class ZenossDevice(DeviceRouter):
 
         return local_templates
 
-    def get_local_template(self):
+    def get_local_templates(self):
         """
         Get ZenossTemplate objects for all locally defined templates.
 
@@ -1037,9 +1037,10 @@ class ZenossDevice(DeviceRouter):
         lt_list = self.list_local_templates()
 
         local_templates = []
+        tr = TemplateRouter(self.api_url, self.api_headers, self.ssl_verify)
         for lt in lt_list:
             local_templates.append(
-                TemplateRouter.get_template(self.uid, lt)
+                tr._get_template_by_uid('{0}/{1}'.format(self.uid, lt))
             )
 
         return local_templates
@@ -1126,9 +1127,10 @@ class ZenossDevice(DeviceRouter):
         )
 
         templates = []
+        tr = TemplateRouter(self.api_url, self.api_headers, self.ssl_verify)
         for t in templates_data:
             templates.append(
-                TemplateRouter._get_template_by_uid(t['uid'])
+                tr._get_template_by_uid(t['uid'])
             )
 
         return templates
@@ -1173,6 +1175,7 @@ class ZenossDevice(DeviceRouter):
         ut_list = self.list_unbound_templates()
         find_path = re.compile('\((\/.*)\)')
         templates = []
+        tr = TemplateRouter(self.api_url, self.api_headers, self.ssl_verify)
         for t in ut_list:
             m = re.search(find_path, t['label'])
             if m:
@@ -1182,7 +1185,7 @@ class ZenossDevice(DeviceRouter):
                     path = m.groups()[0]
                 uid = 'Devices{0}/rrdTemplates/{1}'.format(path, t['name'])
                 templates.append(
-                    TemplateRouter._get_template_by_uid(uid)
+                    tr._get_template_by_uid(uid)
                 )
 
         return templates
@@ -1227,6 +1230,7 @@ class ZenossDevice(DeviceRouter):
         bt_list = self.list_bound_templates()
         find_path = re.compile('\((\/.*)\)')
         templates = []
+        tr = TemplateRouter(self.api_url, self.api_headers, self.ssl_verify)
         for t in bt_list:
             m = re.search(find_path, t['label'])
             if m:
@@ -1236,7 +1240,7 @@ class ZenossDevice(DeviceRouter):
                     path = m.groups()[0]
                 uid = 'Devices{0}/rrdTemplates/{1}'.format(path, t['name'])
                 templates.append(
-                    TemplateRouter._get_template_by_uid(uid)
+                    tr._get_template_by_uid(uid)
                 )
 
         return templates
@@ -1291,9 +1295,10 @@ class ZenossDevice(DeviceRouter):
         )
 
         templates = []
+        tr = TemplateRouter(self.api_url, self.api_headers, self.ssl_verify)
         for t in template_data['data']:
             templates.append(
-                TemplateRouter._get_template_by_uid(t['uid'])
+                tr._get_template_by_uid(t['uid'])
             )
 
         return templates
