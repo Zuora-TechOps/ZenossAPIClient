@@ -1,6 +1,5 @@
 import json
 import pytest
-import responses as responses_redux
 from zenossapi.apiclient import ZenossAPIClientError
 from zenossapi.routers.device import DeviceRouter, ZenossDeviceClass, ZenossDevice, ZenossComponent
 from zenossapi.routers.template import ZenossTemplate
