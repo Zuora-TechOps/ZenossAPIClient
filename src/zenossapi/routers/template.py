@@ -302,6 +302,11 @@ class TemplateRouter(ZenossRouter):
         Returns:
             list(str):
         """
+        if not device_class.startswith('Devices'):
+            if device_class.startswith('/'):
+                device_class = 'Devices{0}'.format(device_class)
+            else:
+                device_class = 'Devices/{0}'.format(device_class)
         templates_data = self._router_request(
             self._make_request_data(
                 'getDeviceClassTemplates',
@@ -327,6 +332,12 @@ class TemplateRouter(ZenossRouter):
         Returns:
             list(ZenossTemplate):
         """
+        if not zenoss_object.startswith('Devices'):
+            if zenoss_object.startswith('/'):
+                zenoss_object = 'Devices{0}'.format(zenoss_object)
+            else:
+                zenoss_object = 'Devices/{0}'.format(zenoss_object)
+
         templates_data = self._router_request(
             self._make_request_data(
                 'getObjTemplates',
@@ -335,10 +346,10 @@ class TemplateRouter(ZenossRouter):
         )
 
         templates = []
-        found_templates = self._find_templates_in_tree(templates_data[0])
+        found_templates = templates_data['data']
         for t in found_templates:
             templates.append(
-                self._get_template_by_uid(t[0])
+                self._get_template_by_uid(t['uid'].replace('/zport/dmd/', '', 1))
             )
         return templates
 
@@ -353,7 +364,13 @@ class TemplateRouter(ZenossRouter):
         Returns:
             ZenossTemplate:
         """
-        template_uid = '{0}/rrdTemplates/{1}'.format(device_class, template)
+        # Check to see if this is a local template instead of a device class
+        # template
+        if "devices" in device_class:
+            template_uid = '{0}/{1}'.format(device_class, template)
+        else:
+            template_uid = '{0}/rrdTemplates/{1}'.format(device_class, template)
+
         return self._get_template_by_uid(template_uid)
 
     def add_template(self, target, name):
@@ -367,8 +384,15 @@ class TemplateRouter(ZenossRouter):
         Returns:
             ZenossTemplate:
         """
+        if not target.startswith('Devices'):
+            if target.startswith('/'):
+                target = 'Devices{0}'.format(target)
+            else:
+                target = 'Devices/{0}'.format(target)
+
         if not target.endswith('rrdTemplates'):
             target = target + '/rrdTemplates'
+
         template_data = self._router_request(
             self._make_request_data(
                 'addTemplate',
@@ -392,6 +416,12 @@ class TemplateRouter(ZenossRouter):
         Returns:
              dict:
         """
+        if not device_class.startswith('Devices'):
+            if device_class.startswith('/'):
+                device_class = 'Devices{0}'.format(device_class)
+            else:
+                device_class = 'Devices/{0}'.format(device_class)
+
         template_uid = '{0}/rrdTemplates/{1}'.format(device_class, template)
         return self._router_request(
             self._make_request_data(
@@ -411,6 +441,12 @@ class TemplateRouter(ZenossRouter):
          Returns:
              ZenossTemplate:
         """
+        if not zenoss_object.startswith('Devices'):
+            if zenoss_object.startswith('/'):
+                zenoss_object = 'Devices{0}'.format(zenoss_object)
+            else:
+                zenoss_object = 'Devices/{0}'.format(zenoss_object)
+
         template_data = self._router_request(
             self._make_request_data(
                 'addLocalRRDTemplate',
@@ -423,7 +459,7 @@ class TemplateRouter(ZenossRouter):
 
         return self._get_template_by_uid(template_data['nodeConfig']['uid'].replace('/zport/dmd/', '', 1))
 
-    def delete_local_template(self, object, name):
+    def delete_local_template(self, zenoss_object, name):
         """
         Builds the request data for deleting a local template to an object.
 
@@ -434,11 +470,17 @@ class TemplateRouter(ZenossRouter):
          Returns:
              dict:
         """
+        if not zenoss_object.startswith('Devices'):
+            if zenoss_object.startswith('/'):
+                zenoss_object = 'Devices{0}'.format(zenoss_object)
+            else:
+                zenoss_object = 'Devices/{0}'.format(zenoss_object)
+
         return self._router_request(
             self._make_request_data(
                 'removeLocalRRDTemplate',
                 dict(
-                    uid=object,
+                    uid=zenoss_object,
                     templateName=name,
                 )
             )
@@ -478,7 +520,7 @@ class TemplateRouter(ZenossRouter):
         )
         threshold_types = []
         for threshold_type in threshold_types_data['data']:
-            threshold_types.append(threshold_type)
+            threshold_types.append(threshold_type['type'])
 
         return threshold_types
 
@@ -615,7 +657,7 @@ class ZenossTemplate(TemplateRouter):
         )
         datasources = []
         for ds in ds_data['data']:
-            datasources.append(ds['uid'])
+            datasources.append(ds['uid'].replace('/zport/dmd/', '', 1))
 
         return datasources
 
@@ -719,7 +761,7 @@ class ZenossTemplate(TemplateRouter):
 
         datapoints = []
         for dp in dp_data['data']:
-            datapoints.append(dp['uid'])
+            datapoints.append(dp['uid'].replace('/zport/dmd/', '', 1))
 
         return datapoints
 
@@ -741,7 +783,10 @@ class ZenossTemplate(TemplateRouter):
         for t in threshold_data['data']:
             thresholds.append(
                 ZenossThreshold(
-                    self.uid, self.headers, self.ssl_verify, t
+                    self.api_url,
+                    self.api_headers,
+                    self.ssl_verify,
+                    t
                 )
             )
 
@@ -763,7 +808,7 @@ class ZenossTemplate(TemplateRouter):
 
         thresholds = []
         for t in threshold_data['data']:
-            thresholds.append(t['uid'])
+            thresholds.append(t['uid'].replace('/zport/dmd/', '', 1))
 
         return thresholds
 
@@ -872,7 +917,7 @@ class ZenossTemplate(TemplateRouter):
 
         graphs = []
         for g in graphs_data:
-            graphs.append(g['uid'])
+            graphs.append(g['uid'].replace('/zport/dmd/', '', 1))
 
         return graphs
 
@@ -993,7 +1038,7 @@ class ZenossDataSource(TemplateRouter):
         datapoints = []
         for dp in dp_data['data']:
             if dp['name'].startswith(self.name):
-                datapoints.append(dp['uid'])
+                datapoints.append(dp['uid'].replace('/zport/dmd/', '', 1))
 
         return datapoints
 
@@ -1113,18 +1158,24 @@ class ZenossDataPoint(TemplateRouter):
         Sets the RRD Type of the data point to COUNTER
 
         Returns:
-            dict:
+            bool:
         """
-        return self.set_properties(dict(rrdtype='COUNTER'))
+        self.set_properties(dict(rrdtype='COUNTER'))
+        self.rrdtype = 'COUNTER'
+
+        return True
 
     def make_gauge(self):
         """
         Sets the RRD Type of the data point to GAUGE
 
         Returns:
-            dict:
+            bool:
         """
-        return self.set_properties(dict(rrdtype='GAUGE'))
+        self.set_properties(dict(rrdtype='GAUGE'))
+        self.rrdtype = 'GAUGE'
+
+        return True
 
     def add_to_graph(self, graph, include_thresholds=False):
         """
@@ -1184,17 +1235,14 @@ class ZenossThreshold(TemplateRouter):
 
         Arguments:
             maxval (str): Maximum value for the data point before alerting
-        """
-        response_data = self._router_request(
-            self._set_properties(
-                dict(
-                    uid=self.uid,
-                    maxval=maxval,
-                )
-            )
-        )
 
-        self.maxval = maxval
+        Returns:
+            bool:
+        """
+        self.set_properties(dict(maxval=maxval))
+        self.properties['maxval'] = maxval
+
+        return True
 
     def set_min(self, minval):
         """
@@ -1203,17 +1251,14 @@ class ZenossThreshold(TemplateRouter):
 
         Arguments:
             minval (str): Minimum value for the data point before alerting
-        """
-        response_data = self._router_request(
-            self._set_properties(
-                dict(
-                    uid=self.uid,
-                    minval=minval,
-                )
-            )
-        )
 
-        self.minval = minval
+        Returns:
+            bool:
+        """
+        self.set_properties(dict(minval=minval))
+        self.properties['minval'] = minval
+
+        return True
 
     def delete(self):
         """
@@ -1274,13 +1319,9 @@ class ZenossGraph(TemplateRouter):
 
         points = []
         for p in points_data['data']:
+            point_datasource = p['dpName'].split('_')[0]
             points.append(
-                ZenossDataPoint(
-                    self.api_url,
-                    self.api_headers,
-                    self.ssl_verify,
-                    p
-                )
+                self._get_data_point_by_uid('{0}/datasources/{1}/datapoints/{2}'.format(self.parent, point_datasource, p['dpName']))
             )
         return points
 
@@ -1300,7 +1341,7 @@ class ZenossGraph(TemplateRouter):
 
         points = []
         for p in points_data['data']:
-            points.append(p['uid'])
+            points.append(p['uid'].replace('/zport/dmd/', '', 1))
 
         return points
 
@@ -1332,7 +1373,7 @@ class ZenossGraph(TemplateRouter):
         """
         data = dict(uid=self.uid)
         data.update(properties)
-        self._router_request(
+        response_data = self._router_request(
             self._make_request_data(
                 'setGraphDefinition',
                 data,
@@ -1341,6 +1382,8 @@ class ZenossGraph(TemplateRouter):
         for prop in properties:
             if getattr(self, prop, False):
                 setattr(self, prop, properties[prop])
+
+        return response_data
 
     def set_zero_baseline(self):
         """
@@ -1403,18 +1446,25 @@ class ZenossGraph(TemplateRouter):
         self.graphPoints = graph_data['data']['graphPoints']
         self.rrdVariables = graph_data['data']['rrdVariables']
 
+        return response_data
+
     def add_graph_threshold(self, threshold):
         """
         Adds a threshold to a graph.
 
         Arguments:
             threshold (str): Uid of the threshold to add
+
+        Returns:
+            dict:
         """
-        response_data = self._make_request_data(
-            'addThresholdToGraph',
-            dict(
-                graphUid=self.uid,
-                thresholdUid=threshold,
+        response_data = self._router_request(
+            self._make_request_data(
+                'addThresholdToGraph',
+                dict(
+                    graphUid=self.uid,
+                    thresholdUid=threshold,
+                )
             )
         )
 
@@ -1426,3 +1476,5 @@ class ZenossGraph(TemplateRouter):
         )
 
         self.graphPoints = graph_data['data']['graphPoints']
+
+        return response_data
