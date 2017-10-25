@@ -34,7 +34,7 @@ class JobsRouter(ZenossRouter):
             jobs (list): List of job uuids
 
         Returns:
-            str: Response message
+            bool:
         """
         jobs_abort_response = self._router_request(
             self._make_request_data(
@@ -43,7 +43,7 @@ class JobsRouter(ZenossRouter):
             )
         )
 
-        return jobs_abort_response['msg']
+        return True
 
     def _delete_jobs_by_uuid(self, jobs):
         """
@@ -64,7 +64,10 @@ class JobsRouter(ZenossRouter):
             )
         )
 
-        return deletes_response['deletedJobs']
+        if deletes_response is None:
+            return []
+        else:
+            return deletes_response['deletedJobs']
 
     def list_jobs(self, start=0, limit=50, sort='scheduled', dir='DESC'):
         """
@@ -190,15 +193,18 @@ class ZenossJob(JobsRouter):
         Abort the job.
 
         Returns:
-            str: Response message
+            bool:
         """
         return self._abort_jobs_by_uuid([self.uuid])
 
     def delete(self):
         """
         Delete the job.
+
+        Returns:
+            list: Job ID
         """
-        self._delete_jobs_by_uuid([self.uuid])
+        return self._delete_jobs_by_uuid([self.uuid])
 
     def get_log(self):
         """
