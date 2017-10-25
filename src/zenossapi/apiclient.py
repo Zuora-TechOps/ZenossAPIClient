@@ -20,15 +20,18 @@ class ZenossAPIClientAuthenticationError(Exception):
 class Client(object):
     """Client class to access the Zenoss JSON API"""
 
-    def __init__(self, host=None, user=None, password=None, ssl_verify=True):
+    def __init__(self, host=None, user=None, password=None, ssl_verify=None):
         """
-        Create the client object to communicate with Zenoss
+        Create the client object to communicate with Zenoss. The authentication
+        and ssl parameters can be pulled from the environment so that they
+        don't have to be passed in from code or command line args.
 
         Arguments:
             host (str): FQDN used to access the Zenoss server
             user (str): Zenoss username
             password (str): Zenoss user's password
-
+            ssl_verify (bool): Whether to verify the SSL certificate or not.
+                Set to false when using servers with self-signed certs.
         """
         if not host:
             if 'ZENOSS_HOST' in os.environ:
@@ -39,6 +42,12 @@ class Client(object):
         if not password:
             if 'ZENOSS_PASSWD' in os.environ:
                 password = os.environ['ZENOSS_PASSWD']
+
+        if not ssl_verify:
+            if 'ZENOSS_SSL_VERIFY' in os.environ:
+                ssl_verify = os.environ['ZENOSS_SSL_VERIFY']
+            else:
+                ssl_verify = True
 
         self.api_host = host
         self.api_url = 'https://{0}/zport/dmd'.format(host)
