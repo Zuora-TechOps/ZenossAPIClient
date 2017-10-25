@@ -44,7 +44,6 @@ device UID for every call.
       ],
       install_requires=[
           'python-dateutil>=2.6.1',
-          'requests>=2.18.4',
-          'urllib3>=1.22',
+          'requests>=2.18.1',
       ]
       )
