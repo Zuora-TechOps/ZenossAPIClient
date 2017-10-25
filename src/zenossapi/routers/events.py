@@ -335,8 +335,8 @@ class EventsRouter(ZenossRouter):
 
         return events
 
-    def create_event(self, summary, device, severity, component=None,
-                     event_class_key=None, event_class='/Status'):
+    def add_event(self, summary, device, severity, component=None,
+                  event_class_key=None, event_class='/Status'):
         """
         Create a new Zenoss event.
 
