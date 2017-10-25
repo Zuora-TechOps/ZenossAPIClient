@@ -16,3 +16,4 @@ gen
 /docs/_build/*
 /.cache
 /.eggs
+/.tox

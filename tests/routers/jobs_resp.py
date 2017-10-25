@@ -1,6 +1,6 @@
 success = {
     "uuid": "8bf7e570-67cd-4670-a37c-0999fd07f9bf",
-    "action": "EventsRouter",
+    "action": "JobsRouter",
     "result": {
         "success": True
     },
