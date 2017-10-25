@@ -34,6 +34,17 @@ def request_callback(request):
         elif rdata['jobid'] == "9ba5c8d7-58de-4f18-96fe-d362841910d3":
             return jobs_resp.detail
 
+    def abort(rdata):
+        return jobs_resp.abort
+
+    def deleteJobs(rdata):
+        if rdata['jobids'] == ["721739ae-2b1d-4613-91e9-681f134a2c49"]:
+            return jobs_resp.delete
+        elif rdata['jobids'] == ["9ba5c8d7-58de-4f18-96fe-d362841910d3"]:
+            return jobs_resp.abort
+        else:
+            return jobs_resp.fail
+
     method = locals()[rdata['method']]
     resp_body = method(rdata['data'][0])
 
@@ -102,3 +113,26 @@ class TestJobsRouter(object):
         job = jr.get_job('721739ae-2b1d-4613-91e9-681f134a2c49')
         resp = job.get_log()
         assert resp['logfile'] == "The log file for this job either does not exist or cannot be accessed."
+
+    def test_jobs_router_abort(self, responses):
+        responses_callback(responses)
+
+        jr = JobsRouter(url, headers, True)
+        job = jr.get_job('721739ae-2b1d-4613-91e9-681f134a2c49')
+        resp = job.abort()
+
+    def test_jobs_router_delete(self, responses):
+        responses_callback(responses)
+
+        jr = JobsRouter(url, headers, True)
+        job = jr.get_job('721739ae-2b1d-4613-91e9-681f134a2c49')
+        resp = job.delete()
+        assert resp[0] == "721739ae-2b1d-4613-91e9-681f134a2c49"
+
+    def test_jobs_router_delete_already_deleted(self, responses):
+        responses_callback(responses)
+
+        jr = JobsRouter(url, headers, True)
+        job = jr.get_job('9ba5c8d7-58de-4f18-96fe-d362841910d3')
+        resp = job.delete()
+        assert resp == []

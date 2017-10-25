@@ -171,3 +171,27 @@ nolog = {
     "type": "rpc",
     "method": "detail"
 }
+
+abort = {
+    "uuid": "a7555c90-fa4c-405b-afcc-4b1f283c730e",
+    "action": "JobsRouter",
+    "result": None,
+    "tid": 1,
+    "type": "rpc",
+    "method": "abort"
+}
+
+delete = {
+    "uuid": "121cb296-936e-4424-9e04-55a4ae66e63f",
+    "action": "JobsRouter",
+    "result": {
+        "deletedJobs": [
+            "721739ae-2b1d-4613-91e9-681f134a2c49"
+        ],
+        "success": True
+    },
+    "tid": 1,
+    "type": "rpc",
+    "method": "deleteJobs"
+}
+
