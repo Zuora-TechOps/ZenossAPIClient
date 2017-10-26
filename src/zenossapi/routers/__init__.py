@@ -45,6 +45,8 @@ class ZenossRouter(object):
                     if 'success' in response_json['result']:
                         if not response_json['result']['success']:
                             raise ZenossAPIClientError('Request failed: {}'.format(response_json['result']['msg']))
+            else:
+                raise ZenossAPIClientError('Request failed, no response data returned!')
 
             return response_json['result']
 
