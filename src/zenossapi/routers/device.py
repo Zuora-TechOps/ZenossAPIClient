@@ -327,14 +327,10 @@ class DeviceRouter(ZenossRouter):
             )
         )
 
-        collector_jobs = []
-        for mj in collector_job_data['new_jobs']:
-            collector_jobs.append(dict(
-                uuid=mj['uuid'],
-                description=mj['description']
-            ))
-
-        return collector_jobs
+        return dict(
+            uuid=collector_job_data['new_jobs']['uuid'],
+            description=collector_job_data['new_jobs']['description']
+        )
 
     def _delete_devices_by_uid(self, devices, action, del_events=False,
                                del_perf=False):
@@ -348,6 +344,9 @@ class DeviceRouter(ZenossRouter):
                 'delete' to delete them from Zenoss
             del_events (bool): Remove all events for the devices
             del_perf (bool): Remove all perf data for the devices
+
+        Returns:
+            dict:
         """
         if action not in ['remove', 'delete']:
             raise ZenossAPIClientError(
@@ -1348,7 +1347,7 @@ class ZenossDevice(DeviceRouter):
 
         return True
 
-    def reset_bound_template(self):
+    def reset_bound_templates(self):
         """
         Remove all bound templates from device.
         """
@@ -1492,7 +1491,7 @@ class ZenossDevice(DeviceRouter):
             str: uuid of the Job Manager job for the change
         """
         job_data = self._set_collector_by_uids([self.uid], collector)
-        return job_data[0]['uuid']
+        return job_data['uuid']
 
     def delete(self, action, del_events=False, del_perf=True):
         """
@@ -1503,6 +1502,9 @@ class ZenossDevice(DeviceRouter):
                 'delete' to delete them from Zenoss
             del_events (bool): Remove all events for the devices
             del_perf (bool): Remove all perf data for the devices
+
+        Returns:
+            bool:
         """
         self._delete_devices_by_uid([self.uid], action, del_events, del_perf)
 
