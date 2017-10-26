@@ -1,3 +1,14 @@
+success = {
+    "uuid": "ba2f41f8-3c48-40a6-ab45-3c5e84252c3c",
+    "action": "DeviceRouter",
+    "result": {
+        "success": True
+    },
+    "tid": 1,
+    "type": "rpc",
+    "method": "setBoundTemplates"
+}
+
 not_found = {
     "uuid": "6662b00f-daec-4d54-a853-deec1867f1fd",
     "action": "DeviceRouter",
@@ -62,6 +73,35 @@ dc_info = {
     "method": "getInfo"
 }
 
+add_dc = {
+    "uuid": "f54838a5-d727-4e17-a7d2-7be3692fa7a0",
+    "action": "DeviceRouter",
+    "result": {
+        "msg": "Device Class Added",
+        "nodeConfig": {
+            "hidden": False,
+            "leaf": False,
+            "uid": "/zport/dmd/Devices/Server/TEST",
+            "text": {
+                "count": 0,
+                "text": "TEST",
+                "description": "devices"
+            },
+            "id": ".zport.dmd.Devices.Server.TEST",
+            "hasNoGlobalRoles": False,
+            "path": "Devices/Server/TEST",
+            "iconCls": "tree-severity-icon-small-clear",
+            "zPythonClass": "ZenPacks.zenoss.LinuxMonitor.LinuxDevice",
+            "children": [],
+            "uuid": "63228c63-477f-4b94-8f6f-5ec535cf65e6"
+        },
+        "success": True
+    },
+    "tid": 1,
+    "type": "rpc",
+    "method": "addDeviceClassNode"
+}
+
 collectors = {
     "uuid": "b9f0e31c-b2d7-4655-9438-11f861cdf69f",
     "action": "DeviceRouter",
@@ -112,6 +152,40 @@ dev_classes = {
     "tid": 1,
     "type": "rpc",
     "method": "getDeviceClasses"
+}
+
+systems = {
+    "uuid": "bd04b292-3ebe-4c2d-94eb-bef1147d9fa5",
+    "action": "DeviceRouter",
+    "result": {
+        "totalCount": 1,
+        "systems": [
+            {
+                "name": "/TestSystem"
+            }
+        ],
+        "success": True
+    },
+    "tid": 1,
+    "type": "rpc",
+    "method": "getSystems"
+}
+
+groups = {
+    "uuid": "f84420aa-105b-4860-a46b-0e6b9e202c1d",
+    "action": "DeviceRouter",
+    "result": {
+        "totalCount": 1,
+        "success": True,
+        "groups": [
+            {
+                "name": "/TestGroup"
+            }
+        ]
+    },
+    "tid": 1,
+    "type": "rpc",
+    "method": "getGroups"
 }
 
 loci = {
@@ -860,6 +934,24 @@ add_dev = {
     "method": "addDevice"
 }
 
+move_dev = {
+    "uuid": "d18bb6b3-023b-407f-9775-a9fbcaa49901",
+    "action": "DeviceRouter",
+    "result": {
+        "new_jobs": [
+            {
+                "uuid": "721739ae-2b1d-4613-91e9-681f134a2c49",
+                "description": "Move test2.example.com to /Server/TEST",
+                "uid": "/zport/dmd/JobManager"
+            }
+        ],
+        "success": True
+    },
+    "tid": 1,
+    "type": "rpc",
+    "method": "moveDevices"
+}
+
 uc = {
     "uuid": "b93045d7-409b-4d2e-9acf-e9c1dd0fdcb2",
     "action": "DeviceRouter",
@@ -1173,4 +1265,117 @@ or_templates = {
     "tid": 1,
     "type": "rpc",
     "method": "getOverridableTemplates"
+}
+
+lock = {
+    "uuid": "9875bbfc-d798-4f80-82ef-e281c380adfb",
+    "action": "DeviceRouter",
+    "result": {
+        "msg": "Locked 1 devices.",
+        "success": True
+    },
+    "tid": 1,
+    "type": "rpc",
+    "method": "lockDevices"
+}
+
+resetip = {
+    "uuid": "d4f79ebf-a259-468f-ac74-fe20f4ea94a9",
+    "action": "DeviceRouter",
+    "result": {
+        "msg": "Reset 1 IP addresses.",
+        "success": True
+    },
+    "tid": 1,
+    "type": "rpc",
+    "method": "resetIp"
+}
+
+prod_state = {
+    "uuid": "7578163f-db1e-4532-b7fa-2dad33445134",
+    "action": "DeviceRouter",
+    "result": {
+        "msg": "Set 1 devices to Maintenance.",
+        "success": True
+    },
+    "tid": 1,
+    "type": "rpc",
+    "method": "setProductionState"
+}
+
+priority = {
+    "uuid": "e3e22b6d-15af-4445-9acc-f2273e6e2ff8",
+    "action": "DeviceRouter",
+    "result": {
+        "msg": "Set 1 devices to Normal priority.",
+        "success": True
+    },
+    "tid": 1,
+    "type": "rpc",
+    "method": "setPriority"
+}
+
+set_collector = {
+    "uuid": "cc3a45d3-3578-4b6e-9056-3c7412ff3fe4",
+    "action": "DeviceRouter",
+    "result": {
+        "new_jobs": {
+            "started": None,
+            "uuid": "bd320c54-4325-47a7-baaf-048a22c1a276",
+            "description": "Move devices test.example.com to collector localhost",
+            "uid": "/zport/dmd/JobManager"
+        },
+        "success": True
+    },
+    "tid": 1,
+    "type": "rpc",
+    "method": "setCollector"
+}
+
+remodel = {
+    "uuid": "55841c99-83f6-4e84-b4ce-a5f68f1b1ac7",
+    "action": "DeviceRouter",
+    "result": {
+        "success": True,
+        "jobId": "8735c0ba-0091-474d-8475-2ae4217aba32"
+    },
+    "tid": 1,
+    "type": "rpc",
+    "method": "remodel"
+}
+
+monitored = {
+    "uuid": "083a95c4-52ff-4c22-99d0-b4e28d345574",
+    "action": "DeviceRouter",
+    "result": {
+        "msg": "Set monitoring to False for 1 components.",
+        "success": True
+    },
+    "tid": 1,
+    "type": "rpc",
+    "method": "setComponentsMonitored"
+}
+
+lock_c = {
+    "uuid": "9875bbfc-d798-4f80-82ef-e281c380adfb",
+    "action": "DeviceRouter",
+    "result": {
+        "msg": "Locked 1 components.",
+        "success": True
+    },
+    "tid": 1,
+    "type": "rpc",
+    "method": "lockComponents"
+}
+
+delete_c = {
+    "uuid": "62bc1c3b-f7f3-41b1-89af-5b0720d089b6",
+    "action": "DeviceRouter",
+    "result": {
+        "msg": "Components deleted.",
+        "success": True
+    },
+    "tid": 1,
+    "type": "rpc",
+    "method": "deleteComponents"
 }

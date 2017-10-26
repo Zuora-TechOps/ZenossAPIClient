@@ -23,7 +23,10 @@ def request_callback(request):
     resp_headers = dict(ContentType='application/json')
 
     def getProductionStates(rdata):
-        resp_body_template['result']['data'].append(dict(name='Production', value=1000))
+        resp_body_template['result']['data'].extend([
+            dict(name='Production', value=1000),
+            dict(name='Maintenance', value=300),
+        ])
         return resp_body_template
 
     def getPriorities(rdata):
@@ -56,8 +59,17 @@ def request_callback(request):
     def getDeviceClasses(rdata):
         return resp_json.dev_classes
 
+    def getGroups(rdata):
+        return resp_json.groups
+
+    def getSystems(rdata):
+        return resp_json.systems
+
     def getDevices(rdata):
         return resp_json.devices
+
+    def addDeviceClassNode(rdata):
+        return resp_json.add_dc
 
     def addDevice(rdata):
         return resp_json.add_dev
@@ -83,8 +95,43 @@ def request_callback(request):
     def getOverridableTemplates(rdata):
         return resp_json.or_templates
 
-    method = locals()[rdata['method']]
-    resp_body = method(rdata['data'][0])
+    def moveDevices(rdata):
+        return resp_json.move_dev
+
+    def lockDevices(rdata):
+        return resp_json.lock
+
+    def resetIp(rdata):
+        return resp_json.resetip
+
+    def setProductionState(rdata):
+        return resp_json.prod_state
+
+    def setPriority(rdata):
+        return resp_json.priority
+
+    def setCollector(rdata):
+        return resp_json.set_collector
+
+    def remodel(rdata):
+        return resp_json.remodel
+
+    def setComponentsMonitored(rdata):
+        return resp_json.monitored
+
+    def lockComponents(rdata):
+        return resp_json.lock_c
+
+    def deleteComponents(rdata):
+        return resp_json.delete_c
+
+    if rdata['method'] in ['setBoundTemplates', 'bindOrUnbindTemplate',
+                           'resetBoundTemplates', 'renameDevice',
+                           'removeDevices']:
+        resp_body = resp_json.success
+    else:
+        method = locals()[rdata['method']]
+        resp_body = method(rdata['data'][0])
 
     return (200, resp_headers, json.dumps(resp_body))
 
@@ -140,6 +187,22 @@ class TestDeviceRouter(object):
         assert len(resp) == 7
         assert resp[-1] == "Devices/Server/SSH/Linux"
 
+    def test_device_router_list_groups(self, responses):
+        responses_callback(responses)
+
+        dr = DeviceRouter(url, headers, True)
+        resp = dr.list_groups()
+        assert len(resp) == 1
+        assert resp[0] == "/TestGroup"
+
+    def test_device_router_list_systems(self, responses):
+        responses_callback(responses)
+
+        dr = DeviceRouter(url, headers, True)
+        resp = dr.list_systems()
+        assert len(resp) == 1
+        assert resp[0] == "/TestSystem"
+
     def test_device_router_get_device_class(self, responses):
         responses_callback(responses)
 
@@ -147,7 +210,7 @@ class TestDeviceRouter(object):
         resp = dr.get_device_class('Server/TEST')
         assert isinstance(resp, ZenossDeviceClass)
 
-    def test_device_router_list_devices(self, responses):
+    def test_device_router_zenossdeviceclass_list_devices(self, responses):
         responses_callback(responses)
 
         dr = DeviceRouter(url, headers, True)
@@ -157,7 +220,7 @@ class TestDeviceRouter(object):
         assert resp['devices'][0]['name'] == "test.example.com"
         assert resp['devices'][0]['uid'] == "Devices/Server/TEST/devices/test.example.com"
 
-    def test_device_router_get_devices(self, responses):
+    def test_device_router_zenossdeviceclass_get_devices(self, responses):
         responses_callback(responses)
 
         dr = DeviceRouter(url, headers, True)
@@ -166,7 +229,7 @@ class TestDeviceRouter(object):
         assert len(resp['devices']) == 1
         assert isinstance(resp['devices'][0], ZenossDevice)
 
-    def test_device_router_get_device(self, responses):
+    def test_device_router_zenossdeviceclass_get_device(self, responses):
         responses_callback(responses)
 
         dr = DeviceRouter(url, headers, True)
@@ -175,7 +238,15 @@ class TestDeviceRouter(object):
         assert isinstance(resp, ZenossDevice)
         assert resp.uid == "Devices/Server/TEST/devices/test.example.com"
 
-    def test_device_router_add_device(self, responses):
+    def test_device_router_zenossdeviceclass_add_subclass(self, responses):
+        responses_callback(responses)
+
+        dr = DeviceRouter(url, headers, True)
+        dc = dr.get_device_class('Server/TEST')
+        resp = dc.add_subclass('Foo')
+        assert isinstance(resp, ZenossDeviceClass)
+
+    def test_device_router_zenossdeviceclass_add_device(self, responses):
         responses_callback(responses)
 
         dr = DeviceRouter(url, headers, True)
@@ -183,7 +254,7 @@ class TestDeviceRouter(object):
         resp = dc.add_device('test2.example.com')
         assert resp == "721739ae-2b1d-4613-91e9-681f134a2c49"
 
-    def test_device_router_list_components(self, responses):
+    def test_device_router_zenossdevice_list_components(self, responses):
         responses_callback(responses)
 
         dr = DeviceRouter(url, headers, True)
@@ -193,7 +264,7 @@ class TestDeviceRouter(object):
         assert resp['total'] == 1
         assert resp['components'][0] == "hw/cpus/0"
 
-    def test_device_router_get_components(self, responses):
+    def test_device_router_zenossdevice_get_components(self, responses):
         responses_callback(responses)
 
         dr = DeviceRouter(url, headers, True)
@@ -203,7 +274,7 @@ class TestDeviceRouter(object):
         assert len(resp) == 1
         assert isinstance(resp[0], ZenossComponent)
 
-    def test_device_router_get_component(self, responses):
+    def test_device_router_zenossdevice_get_component(self, responses):
         responses_callback(responses)
 
         dr = DeviceRouter(url, headers, True)
@@ -214,7 +285,7 @@ class TestDeviceRouter(object):
         assert resp.meta_type == "CPU"
         assert resp.name == "0"
 
-    def test_device_router_list_user_commands(self, responses):
+    def test_device_router_zenossdevice_list_user_commands(self, responses):
         responses_callback(responses)
 
         dr = DeviceRouter(url, headers, True)
@@ -224,7 +295,7 @@ class TestDeviceRouter(object):
         assert len(resp) == 6
         assert resp[2]['name'] == "ping"
 
-    def test_device_router_list_local_templates(self, responses):
+    def test_device_router_zenossdevice_list_local_templates(self, responses):
         responses_callback(responses)
 
         dr = DeviceRouter(url, headers, True)
@@ -233,7 +304,7 @@ class TestDeviceRouter(object):
         resp = d.list_local_templates()
         assert resp[0] == "DnsMonitor"
 
-    def test_device_router_get_local_templates(self, responses):
+    def test_device_router_zenossdevice_get_local_templates(self, responses):
         responses.assert_all_requests_are_fired = False
         responses.add(
             responses.POST,
@@ -254,7 +325,7 @@ class TestDeviceRouter(object):
         assert isinstance(resp[0], ZenossTemplate)
         assert resp[0].uid == "Devices/Server/TEST/devices/test.example.com/DnsMonitor"
 
-    def test_device_router_list_active_templates(self, responses):
+    def test_device_router_zenossdevice_list_active_templates(self, responses):
         responses_callback(responses)
 
         dr = DeviceRouter(url, headers, True)
@@ -263,7 +334,7 @@ class TestDeviceRouter(object):
         resp = d.list_active_templates()
         assert resp[0]['name'] == "Device"
 
-    def test_device_router_get_active_templates(self, responses):
+    def test_device_router_zenossdevice_get_active_templates(self, responses):
         responses.assert_all_requests_are_fired = False
         responses.add_callback(
             responses.POST,
@@ -285,7 +356,7 @@ class TestDeviceRouter(object):
         assert isinstance(resp[0], ZenossTemplate)
         assert resp[0].uid == "Devices/Server/TEST/rrdTemplates/Device"
 
-    def test_device_router_list_unbound_templates(self, responses):
+    def test_device_router_zenossdevice_list_unbound_templates(self, responses):
         responses_callback(responses)
 
         dr = DeviceRouter(url, headers, True)
@@ -294,7 +365,7 @@ class TestDeviceRouter(object):
         resp = d.list_unbound_templates()
         assert resp[0]['name'] == "Apache"
 
-    def test_device_router_get_unbound_templates(self, responses):
+    def test_device_router_zenossdevice_get_unbound_templates(self, responses):
         responses.assert_all_requests_are_fired = False
         responses.add_callback(
             responses.POST,
@@ -317,7 +388,7 @@ class TestDeviceRouter(object):
         assert resp[0].uid == "Devices/Server/rrdTemplates/Apache"
         assert resp[1].name == "DigMonitor"
 
-    def test_device_router_list_bound_templates(self, responses):
+    def test_device_router_zenossdevice_list_bound_templates(self, responses):
         responses_callback(responses)
 
         dr = DeviceRouter(url, headers, True)
@@ -326,7 +397,7 @@ class TestDeviceRouter(object):
         resp = d.list_bound_templates()
         assert resp[0]['name'] == "Device"
         
-    def test_device_router_get_bound_templates(self, responses):
+    def test_device_router_zenossdevice_get_bound_templates(self, responses):
         responses.assert_all_requests_are_fired = False
         responses.add_callback(
             responses.POST,
@@ -347,7 +418,7 @@ class TestDeviceRouter(object):
         assert len(resp) == 2
         assert isinstance(resp[0], ZenossTemplate)
 
-    def test_device_router_list_overridable_templates(self, responses):
+    def test_device_router_zenossdevice_list_overridable_templates(self, responses):
         responses_callback(responses)
 
         dr = DeviceRouter(url, headers, True)
@@ -356,7 +427,7 @@ class TestDeviceRouter(object):
         resp = d.list_overridable_templates()
         assert resp[0]['name'] == "Device"
 
-    def test_device_router_get_overridable_templates(self, responses):
+    def test_device_router_zenossdevice_get_overridable_templates(self, responses):
         responses.assert_all_requests_are_fired = False
         responses.add_callback(
             responses.POST,
@@ -376,3 +447,174 @@ class TestDeviceRouter(object):
         resp = d.get_overridable_templates()
         assert len(resp) == 1
         assert isinstance(resp[0], ZenossTemplate)
+
+    def test_device_router_zenossdevice_set_bound_templates(self, responses):
+        responses_callback(responses)
+
+        dr = DeviceRouter(url, headers, True)
+        dc = dr.get_device_class('Server/TEST')
+        d = dc.get_device('test.example.com')
+        resp = d.set_bound_templates(['Device'])
+
+    def test_device_router_zenossdevice_bind_or_unbind_template(self, responses):
+        responses_callback(responses)
+
+        dr = DeviceRouter(url, headers, True)
+        dc = dr.get_device_class('Server/TEST')
+        d = dc.get_device('test.example.com')
+        resp = d.bind_or_unbind_template('Devices', 'DnsMonitor')
+
+    def test_device_router_zenossdevice_reset_bound_templates(self, responses):
+        responses_callback(responses)
+
+        dr = DeviceRouter(url, headers, True)
+        dc = dr.get_device_class('Server/TEST')
+        d = dc.get_device('test.example.com')
+        resp = d.reset_bound_templates()
+
+    def test_device_router_zenossdevice_move(self, responses):
+        responses_callback(responses)
+
+        dr = DeviceRouter(url, headers, True)
+        dc = dr.get_device_class('Server/TEST')
+        d = dc.get_device('test.example.com')
+        resp = d.move('Server/TEST')
+
+    def test_device_router_zenossdevice_reidentify(self, responses):
+        responses_callback(responses)
+
+        dr = DeviceRouter(url, headers, True)
+        dc = dr.get_device_class('Server/TEST')
+        d = dc.get_device('test.example.com')
+        resp = d.reidentify('test2.example.com')
+
+    def test_device_router_zenossdevice_lock(self, responses):
+        responses_callback(responses)
+
+        dr = DeviceRouter(url, headers, True)
+        dc = dr.get_device_class('Server/TEST')
+        d = dc.get_device('test.example.com')
+        resp = d.lock(updates=True, deletion=True)
+        assert resp == "Locked 1 devices."
+
+    def test_device_router_zenossdevice_lock_for_updates(self, responses):
+        responses_callback(responses)
+
+        dr = DeviceRouter(url, headers, True)
+        dc = dr.get_device_class('Server/TEST')
+        d = dc.get_device('test.example.com')
+        resp = d.lock_for_updates()
+        assert resp == "Locked 1 devices."
+
+    def test_device_router_zenossdevice_lock_for_deletion(self, responses):
+        responses_callback(responses)
+
+        dr = DeviceRouter(url, headers, True)
+        dc = dr.get_device_class('Server/TEST')
+        d = dc.get_device('test.example.com')
+        resp = d.lock_for_deletion()
+        assert resp == "Locked 1 devices."
+
+    def test_device_router_zenossdevice_reset_ip_address(self, responses):
+        responses_callback(responses)
+
+        dr = DeviceRouter(url, headers, True)
+        dc = dr.get_device_class('Server/TEST')
+        d = dc.get_device('test.example.com')
+        resp = d.reset_ip_address()
+        assert resp == "Reset 1 IP addresses."
+
+    def test_device_router_zenossdevice_set_production_state(self, responses):
+        responses_callback(responses)
+
+        dr = DeviceRouter(url, headers, True)
+        dc = dr.get_device_class('Server/TEST')
+        d = dc.get_device('test.example.com')
+        resp = d.set_production_state(300)
+        assert resp == "Set 1 devices to Maintenance."
+
+    def test_device_router_zenossdevice_set_priority(self, responses):
+        responses_callback(responses)
+
+        dr = DeviceRouter(url, headers, True)
+        dc = dr.get_device_class('Server/TEST')
+        d = dc.get_device('test.example.com')
+        resp = d.set_priority(3)
+        assert resp == "Set 1 devices to Normal priority."
+
+    def test_device_router_zenossdevice_set_collector(self, responses):
+        responses_callback(responses)
+
+        dr = DeviceRouter(url, headers, True)
+        dc = dr.get_device_class('Server/TEST')
+        d = dc.get_device('test.example.com')
+        resp = d.set_collector('localhost')
+        assert resp == "bd320c54-4325-47a7-baaf-048a22c1a276"
+
+    def test_device_router_zenossdevice_delete(self, responses):
+        responses_callback(responses)
+
+        dr = DeviceRouter(url, headers, True)
+        dc = dr.get_device_class('Server/TEST')
+        d = dc.get_device('test.example.com')
+        resp = d.delete('delete')
+        assert resp
+
+    def test_device_router_zenossdevice_remodel(self, responses):
+        responses_callback(responses)
+
+        dr = DeviceRouter(url, headers, True)
+        dc = dr.get_device_class('Server/TEST')
+        d = dc.get_device('test.example.com')
+        resp = d.remodel()
+        assert resp == "8735c0ba-0091-474d-8475-2ae4217aba32"
+
+    def test_device_router_zenosscomponent_set_monitored(self, responses):
+        responses_callback(responses)
+
+        dr = DeviceRouter(url, headers, True)
+        dc = dr.get_device_class('Server/TEST')
+        d = dc.get_device('test.example.com')
+        c = d.get_component('hw/cpus/0')
+        resp = c.set_monitored(False)
+        assert resp == "Set monitoring to False for 1 components."
+
+    def test_device_router_zenosscomponent_lock(self, responses):
+        responses_callback(responses)
+
+        dr = DeviceRouter(url, headers, True)
+        dc = dr.get_device_class('Server/TEST')
+        d = dc.get_device('test.example.com')
+        c = d.get_component('hw/cpus/0')
+        resp = c.lock(updates=True, deletion=True)
+        assert resp == "Locked 1 components."
+
+    def test_device_router_zenosscomponent_lock_for_updates(self, responses):
+        responses_callback(responses)
+
+        dr = DeviceRouter(url, headers, True)
+        dc = dr.get_device_class('Server/TEST')
+        d = dc.get_device('test.example.com')
+        c = d.get_component('hw/cpus/0')
+        resp = c.lock_for_updates()
+        assert resp == "Locked 1 components."
+
+    def test_device_router_zenosscomponent_lock_for_deletion(self, responses):
+        responses_callback(responses)
+
+        dr = DeviceRouter(url, headers, True)
+        dc = dr.get_device_class('Server/TEST')
+        d = dc.get_device('test.example.com')
+        c = d.get_component('hw/cpus/0')
+        resp = c.lock_for_deletion()
+        assert resp == "Locked 1 components."
+
+    def test_device_router_zenosscomponent_delete(self, responses):
+        responses_callback(responses)
+
+        dr = DeviceRouter(url, headers, True)
+        dc = dr.get_device_class('Server/TEST')
+        d = dc.get_device('test.example.com')
+        c = d.get_component('hw/cpus/0')
+        resp = c.delete()
+        assert resp == "Components deleted."
