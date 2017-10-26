@@ -493,6 +493,9 @@ class ZenossEvent(EventsRouter):
             )
         )
 
+        event_detail = self._get_details_by_evid(self.evid)
+        self.log = event_detail['log']
+
         return True
 
     def close(self):
@@ -505,7 +508,7 @@ class ZenossEvent(EventsRouter):
         """
         Acknowledge the event.
         """
-        return self._event_actions('ack', [self.evid])
+        return self._event_actions('acknowledge', [self.evid])
 
     def reopen(self):
         """
