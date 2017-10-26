@@ -34,10 +34,6 @@ device UID for every call.
       packages=find_packages(where='src'),
       package_dir={'': 'src'},
       zip_safe=False,
-      setup_requires=[
-          'pytest-runner>=2.12.1',
-          'Sphinx>=1.6.4',
-      ],
       tests_require=[
           'pytest>=3.2.3',
           'pytest-responses>=0.3.0',
