@@ -325,3 +325,84 @@ events_config = {
     "type": "rpc",
     "method": "getConfig"
 }
+
+add_event_evid_query = {
+    "uuid": "6700ab59-c559-42ec-959b-ebc33bc52257",
+    "action": "EventsRouter",
+    "result": {
+        "totalCount": 1,
+        "events": [
+            {
+                "evid": "02420a11-000c-a561-11e7-ba9b510182b3",
+            }
+        ],
+        "success": True,
+        "asof": 1509056503.945677
+    },
+    "tid": 1,
+    "type": "rpc",
+    "method": "query"
+}
+
+add_event_detail = {
+    "uuid": "c54074e8-af8b-4e40-a679-7dbe314709ed",
+    "action": "EventsRouter",
+    "result": {
+        "event": [
+            {
+                "prodState": None,
+                "firstTime": 1509056189.91,
+                "device_uuid": None,
+                "eventClassKey": None,
+                "agent": None,
+                "dedupid": "Heart of Gold|Arthur Dent|/Status|3|Out of Tea",
+                "Location": [],
+                "component_url": None,
+                "ownerid": None,
+                "eventClassMapping_url": None,
+                "eventClass": "/Status",
+                "id": "02420a11-000c-a561-11e7-ba9b510182b3",
+                "device_title": "Heart of Gold",
+                "DevicePriority": None,
+                "log": [
+                    [
+                        "zenoss",
+                        1509057815980,
+                        "<p>Test log entry</p>"
+                    ]
+                ],
+                "facility": None,
+                "eventClass_url": "/zport/dmd/Events/Status",
+                "monitor": None,
+                "priority": None,
+                "device_url": None,
+                "details": [],
+                "DeviceClass": [],
+                "eventKey": "",
+                "evid": "02420a11-000c-a561-11e7-ba9b510182b3",
+                "eventClassMapping": None,
+                "component": "Arthur Dent",
+                "clearid": None,
+                "DeviceGroups": [],
+                "eventGroup": None,
+                "device": "Heart of Gold",
+                "Systems": [],
+                "component_title": "Arthur Dent",
+                "severity": 3,
+                "count": 1,
+                "stateChange": 1509056189.91,
+                "ntevid": None,
+                "summary": "Out of Tea",
+                "message": "Out of Tea",
+                "eventState": "New",
+                "lastTime": 1509056189.91,
+                "ipAddress": "",
+                "component_uuid": None
+            }
+        ],
+        "success": True
+    },
+    "tid": 1,
+    "type": "rpc",
+    "method": "detail"
+}

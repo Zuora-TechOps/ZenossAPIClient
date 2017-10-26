@@ -16,21 +16,29 @@ def request_callback(request):
     resp_headers = dict(ContentType='application/json')
 
     def query(rdata):
-        if rdata['keys'] == "evid":
-            return events_resp.events_query_evid
+        if rdata['keys'] and rdata['keys'][0] == "evid":
+            if 'params' in rdata and 'summary' in rdata['params'] and rdata['params']['summary'] == "Out of Tea":
+                return events_resp.add_event_evid_query
+            else:
+                return events_resp.events_query_evid
         else:
             return events_resp.events_query
 
     def detail(rdata):
         if rdata['evid'] == "02420a11-0015-98b9-11e7-9d96ae351999":
             return events_resp.event_detail
+        elif rdata['evid'] == "02420a11-000c-a561-11e7-ba9b510182b3":
+            return events_resp.add_event_detail
         else:
             return events_resp.fail
 
     def getConfig(rdata):
         return events_resp.events_config
 
-    if rdata['method'] in ['close', 'acknowledge', 'reopen']:
+    if rdata['method'] in ['close', 'acknowledge', 'reopen',
+                           'setConfigValues', 'add_event',
+                           'clear_heartbeats', 'clear_heartbeat',
+                           'write_log']:
         resp_body = events_resp.success
     else:
         method = locals()[rdata['method']]
@@ -102,7 +110,14 @@ class TestEventsRouter(object):
         assert len(resp) == 2
         assert resp[0]['id'] == "event_age_disable_severity"
 
-    def test_events_get_event_by_evid(self, responses):
+    def test_events_router_update_config(self, responses):
+        responses_callback(responses)
+
+        er = EventsRouter(url, headers, True)
+        resp = er.update_config(dict(event_age_disable_severity=3))
+        assert resp
+
+    def test_events_router_get_event_by_evid(self, responses):
         responses_callback(responses)
 
         er = EventsRouter(url, headers, True)
@@ -110,16 +125,98 @@ class TestEventsRouter(object):
         assert isinstance(resp, ZenossEvent)
         assert resp.evid == "02420a11-0015-98b9-11e7-9d96ae351999"
 
-    def test_events_get_open_events(self, responses):
+    def test_events_router_list_open_events(self, responses):
+        responses_callback(responses)
+
+        er = EventsRouter(url, headers, True)
+        resp = er.list_open_events()
+        assert len(resp['events']) == 1
+        assert resp['total'] == 50
+        assert resp['events'][0]['evid'] == "02420a11-0015-98b9-11e7-9d96ae351999"
+
+    def test_events_router_get_open_events(self, responses):
         responses_callback(responses)
 
         er = EventsRouter(url, headers, True)
         resp = er.get_open_events()
         assert isinstance(resp[0], ZenossEvent)
 
-    def test_events_get_open_production_events(self, responses):
+    def test_events_router_list_open_production_events(self, responses):
+        responses_callback(responses)
+
+        er = EventsRouter(url, headers, True)
+        resp = er.list_open_production_events()
+        assert len(resp['events']) == 1
+        assert resp['total'] == 50
+        assert resp['events'][0]['evid'] == "02420a11-0015-98b9-11e7-9d96ae351999"
+
+    def test_events_router_get_open_production_events(self, responses):
         responses_callback(responses)
 
         er = EventsRouter(url, headers, True)
         resp = er.get_open_production_events()
         assert isinstance(resp[0], ZenossEvent)
+
+    def test_events_router_add_event(self, responses):
+        responses_callback(responses)
+
+        er = EventsRouter(url, headers, True)
+        resp = er.add_event(
+            "Out of Tea",
+            "Heart of Gold",
+            3,
+            component="Arthur Dent"
+        )
+        assert isinstance(resp, ZenossEvent)
+        assert resp.evid == "02420a11-000c-a561-11e7-ba9b510182b3"
+
+    def test_events_router_clear_heartbeats(self, responses):
+        responses_callback(responses)
+
+        er = EventsRouter(url, headers, True)
+        resp = er.clear_heartbeats()
+        assert resp
+
+    def test_events_router_clear_heartbeat(self, responses):
+        responses_callback(responses)
+
+        er = EventsRouter(url, headers, True)
+        resp = er.clear_heartbeat(
+            collector='localhost',
+            daemon='zenpython'
+        )
+        assert resp
+
+    def test_events_router_zenossevent_update_log(self, responses):
+        responses_callback(responses)
+
+        er = EventsRouter(url, headers, True)
+        ev = er.get_event_by_evid("02420a11-000c-a561-11e7-ba9b510182b3")
+        ev.log = []
+        ev.update_log('Test log entry')
+        assert len(ev.log) == 1
+        assert ev.log[0][0] == "zenoss"
+
+    def test_events_router_zenossevent_close(self, responses):
+        responses_callback(responses)
+
+        er = EventsRouter(url, headers, True)
+        ev = er.get_event_by_evid("02420a11-000c-a561-11e7-ba9b510182b3")
+        resp = ev.close()
+        assert resp
+
+    def test_events_router_zenossevent_ack(self, responses):
+        responses_callback(responses)
+
+        er = EventsRouter(url, headers, True)
+        ev = er.get_event_by_evid("02420a11-000c-a561-11e7-ba9b510182b3")
+        resp = ev.ack()
+        assert resp
+
+    def test_events_router_zenossevent_reopen(self, responses):
+        responses_callback(responses)
+
+        er = EventsRouter(url, headers, True)
+        ev = er.get_event_by_evid("02420a11-000c-a561-11e7-ba9b510182b3")
+        resp = ev.reopen()
+        assert resp
