@@ -43,9 +43,15 @@ class Client(object):
             if 'ZENOSS_PASSWD' in os.environ:
                 password = os.environ['ZENOSS_PASSWD']
 
-        if not ssl_verify:
+        if ssl_verify is None:
             if 'ZENOSS_SSL_VERIFY' in os.environ:
                 ssl_verify = os.environ['ZENOSS_SSL_VERIFY']
+            else:
+                ssl_verify = True
+
+        if isinstance(ssl_verify, str):
+            if ssl_verify == "False":
+                ssl_verify = False
             else:
                 ssl_verify = True
 
