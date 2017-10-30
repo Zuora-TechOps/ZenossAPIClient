@@ -1,35 +1,40 @@
-zenossapi\.routers package
-==========================
+zenossapi Routers
+=================
 
-Submodules
-----------
+``routers`` Base Class
+----------------------
 
-zenossapi\.routers\.device module
----------------------------------
+.. automodule:: zenossapi.routers
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+Device Router
+-------------
 
 .. automodule:: zenossapi.routers.device
     :members:
     :undoc-members:
     :show-inheritance:
 
-zenossapi\.routers\.events module
----------------------------------
+Events Router
+-------------
 
 .. automodule:: zenossapi.routers.events
     :members:
     :undoc-members:
     :show-inheritance:
 
-zenossapi\.routers\.jobs module
--------------------------------
+Jobs Router
+-----------
 
 .. automodule:: zenossapi.routers.jobs
     :members:
     :undoc-members:
     :show-inheritance:
 
-zenossapi\.routers\.template module
------------------------------------
+Template Router
+---------------
 
 .. automodule:: zenossapi.routers.template
     :members:
@@ -37,10 +42,3 @@ zenossapi\.routers\.template module
     :show-inheritance:
 
 
-Module contents
----------------
-
-.. automodule:: zenossapi.routers
-    :members:
-    :undoc-members:
-    :show-inheritance:
