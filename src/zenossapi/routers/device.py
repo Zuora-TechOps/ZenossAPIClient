@@ -16,7 +16,8 @@ class DeviceRouter(ZenossRouter):
     """
 
     def __init__(self, url, headers, ssl_verify):
-        super(DeviceRouter, self).__init__(url, headers, ssl_verify, 'device_router', 'DeviceRouter')
+        super(DeviceRouter, self).__init__(url, headers, ssl_verify,
+                                           'device_router', 'DeviceRouter')
         self.uid = None
         self.properties = None
         self.prod_states_by_value = {}
@@ -131,7 +132,8 @@ class DeviceRouter(ZenossRouter):
 
         """
         if not isinstance(devices, list):
-            raise ZenossAPIClientError('Type error: devices to move must be a list')
+            raise ZenossAPIClientError(
+                'Type error: devices to move must be a list')
 
         move_job_data = self._router_request(
             self._make_request_data(
@@ -600,13 +602,15 @@ class ZenossDeviceClass(DeviceRouter):
         self.connectionInfo = device_class_data['connectionInfo']
         self.events = device_class_data['events']
 
-    def list_devices(self, params=None, start=0, limit=50, sort='name', dir='ASC'):
+    def list_devices(self, params=None, keys=None, start=0, limit=50,
+                     sort='name', dir='ASC'):
         """
         List the devices contained in a device class. Supports pagination.
 
         Arguments:
             params (dict): Key/value filters for the search, options are
                 name, ipAddress, deviceClass, or productionState
+            keys (list): List of keys to return for the devices found
             start (int): Offset to start device list from, default 0
             limit (int): The number of results to return, default 50
             sort (str): Sort key for the list, default is 'name'
@@ -615,12 +619,26 @@ class ZenossDeviceClass(DeviceRouter):
         Returns:
             dict:
         """
+        if not keys:
+            keys = [
+                'name',
+                'uid',
+                'ipAddressString',
+                'collector',
+                'productionState',
+                'priority',
+                'location',
+                'groups',
+                'events'
+            ]
+
         device_data = self._router_request(
             self._make_request_data(
                 'getDevices',
                 dict(
                     uid=self.uid,
                     params=params,
+                    keys=keys,
                     start=start,
                     limit=limit,
                     sort=sort,
@@ -635,27 +653,23 @@ class ZenossDeviceClass(DeviceRouter):
             devices=[],
         )
         for device in device_data['devices']:
-            if device['location']:
-                location = device['location']['name']
-            else:
-                location = None
-            device_list['devices'].append(
-                dict(
-                    name=device['name'],
-                    uid=device['uid'].replace('/zport/dmd/', '', 1),
-                    ip_address=device['ipAddressString'],
-                    collector=device['collector'],
-                    prod_state=self.prod_states_by_value[device['productionState']],
-                    priority=self.priorities_by_value[device['priority']],
-                    location=location,
-                    groups=device['groups'],
-                    events=device['events'],
-                )
-            )
+            devinfo = dict()
+            for key in keys:
+                if key == "uid":
+                    devinfo['uid'] = device['uid'].replace('/zport/dmd/', '', 1)
+                elif key == "location":
+                    if device['location']:
+                        devinfo['location'] = device['location']['name']
+                    else:
+                        devinfo['location'] = None
+                else:
+                    devinfo[key] = device[key]
+            device_list['devices'].append(devinfo)
 
         return device_list
 
-    def get_devices(self, params=None, start=0, limit=50, sort='name', dir='ASC'):
+    def get_devices(self, params=None, start=0, limit=50, sort='name',
+                    dir='ASC'):
         """
         Get the devices contained in a device class. Supports pagination.
 
@@ -697,7 +711,8 @@ class ZenossDeviceClass(DeviceRouter):
             devices=[]
         )
         for device in device_data['devices']:
-            device_list['devices'].append(self._get_device_by_uid(device['uid'].replace('/zport/dmd/', '', 1)))
+            device_list['devices'].append(self._get_device_by_uid(
+                device['uid'].replace('/zport/dmd/', '', 1)))
 
         return device_list
 
@@ -875,7 +890,8 @@ class ZenossDevice(DeviceRouter):
         self.properties = device_data
         self.parent = self.uid.split('/devices/')[0]
 
-    def list_components(self, meta_type=None, start=0, limit=50, sort='name', dir='ASC', name=None):
+    def list_components(self, meta_type=None, start=0, limit=50, sort='name',
+                        dir='ASC', name=None):
         """
         Get a list of all the components on a device. Supports pagination.
 
@@ -919,11 +935,13 @@ class ZenossDevice(DeviceRouter):
         )
 
         for c in components_data['data']:
-            components_list['components'].append(c['uid'].split('/{0}/'.format(self.id))[-1])
+            components_list['components'].append(
+                c['uid'].split('/{0}/'.format(self.id))[-1])
 
         return components_list
 
-    def get_components(self, meta_type=None, start=0, limit=50, sort='name', dir='ASC', name=None):
+    def get_components(self, meta_type=None, start=0, limit=50, sort='name',
+                       dir='ASC', name=None):
         """
         Get component objects for all components on the device. Supports Pagination.
 
@@ -938,11 +956,14 @@ class ZenossDevice(DeviceRouter):
         Returns:
             list(ZenossComponent):
         """
-        components_list = self.list_components(meta_type=meta_type, start=start, limit=limit, sort=sort, dir=dir, name=name)
+        components_list = self.list_components(meta_type=meta_type, start=start,
+                                               limit=limit, sort=sort, dir=dir,
+                                               name=name)
 
         components = []
         for component in components_list['components']:
-            c_info = self._get_info_by_uid('{0}/{1}'.format(self.uid, component))
+            c_info = self._get_info_by_uid(
+                '{0}/{1}'.format(self.uid, component))
             components.append(
                 ZenossComponent(
                     self.api_url,
@@ -1239,7 +1260,8 @@ class ZenossDevice(DeviceRouter):
                 else:
                     path = m.groups()[0]
                 if path.endswith(self.name):
-                    path = path.replace(self.name, 'devices/{0}'.format(self.name))
+                    path = path.replace(self.name,
+                                        'devices/{0}'.format(self.name))
                     uid = 'Devices{0}/{1}'.format(path, t['name'])
                 else:
                     uid = 'Devices{0}/rrdTemplates/{1}'.format(path, t['name'])
@@ -1340,7 +1362,8 @@ class ZenossDevice(DeviceRouter):
                 'bindOrUnbindTemplate',
                 dict(
                     uid=self.uid,
-                    templateUid='Devices{0}/rrdtemplates/{1}'.format(path, template)
+                    templateUid='Devices{0}/rrdtemplates/{1}'.format(path,
+                                                                     template)
                 )
             )
         )
@@ -1462,7 +1485,8 @@ class ZenossDevice(DeviceRouter):
         Returns:
             str: Response message
         """
-        message = self._set_production_state_by_uids([self.uid], production_state)
+        message = self._set_production_state_by_uids([self.uid],
+                                                     production_state)
         self.productionState = production_state
         return message
 
