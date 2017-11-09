@@ -638,6 +638,7 @@ class ZenossDeviceClass(DeviceRouter):
                 dict(
                     uid=self.uid,
                     params=params,
+                    keys=keys,
                     start=start,
                     limit=limit,
                     sort=sort,
