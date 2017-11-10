@@ -975,6 +975,19 @@ class ZenossDeviceClass(DeviceRouter):
         pr = PropertiesRouter(self.api_url, self.api_headers, self.ssl_verify)
         return pr.set_property_value(self.uid, zproperty, value=value)
 
+    def delete_property(self, zproperty):
+        """
+        Delete the locally set value of a property for a device class
+
+        Arguments:
+            zproperty (str): ID of the property to delete.
+
+        Returns:
+            bool:
+        """
+        pr = PropertiesRouter(self.api_url, self.api_headers, self.ssl_verify)
+        return pr.delete_property(self.uid, zproperty)
+
 
 class ZenossDevice(DeviceRouter):
     """
@@ -1814,6 +1827,19 @@ class ZenossDevice(DeviceRouter):
         """
         pr = PropertiesRouter(self.api_url, self.api_headers, self.ssl_verify)
         return pr.set_property_value(self.uid, zproperty, value=value)
+
+    def delete_property(self, zproperty):
+        """
+        Delete the locally set value of a property for a device
+
+        Arguments:
+            zproperty (str): ID of the property to delete.
+
+        Returns:
+            bool:
+        """
+        pr = PropertiesRouter(self.api_url, self.api_headers, self.ssl_verify)
+        return pr.delete_property(self.uid, zproperty)
 
 
 class ZenossComponent(DeviceRouter):
