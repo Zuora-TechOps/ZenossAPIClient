@@ -7,6 +7,7 @@ Zenoss device_router
 import re
 from zenossapi.apiclient import ZenossAPIClientError
 from zenossapi.routers import ZenossRouter
+from zenossapi.routers.properties import PropertiesRouter
 from zenossapi.routers.template import TemplateRouter
 
 
@@ -842,6 +843,138 @@ class ZenossDeviceClass(DeviceRouter):
 
         return job_data['new_jobs'][0]['uuid']
 
+    def list_properties(self, params=None, sort=None, sort_dir='ASC'):
+        """
+        List the configuration properties for the device class
+
+        Arguments:
+            params (dict): Search parameters to filter the properties list on.
+            sort (str): Sort key for the properties list.
+            sort_dir (str): Sort direction, either ASC or DESC
+
+        Returns:
+            dict(int, list(dict)): ::
+
+            {
+                'total': Total count of properties returned.
+                'properties': List of properties found.
+            }
+
+        """
+        pr = PropertiesRouter(self.api_url, self.api_headers, self.ssl_verify)
+        return pr.list_properties(self.uid, params=params, sort=sort,
+                                  sort_dir=sort_dir)
+
+    def list_local_properties(self):
+        """
+        List the locally defined configuration properties for the device class
+
+        Returns:
+            dict(int, list(dict)): ::
+
+            {
+                'total': Total count of properties returned.
+                'properties': List of properties found.
+            }
+
+        """
+        pr = PropertiesRouter(self.api_url, self.api_headers, self.ssl_verify)
+        return pr.list_local_properties(self.uid)
+
+    def list_custom_properties(self):
+        """
+        List the custom properties for the device class
+
+        Returns:
+            dict(int, list(dict)): ::
+
+            {
+                'total': Total count of properties returned.
+                'properties': List of properties found.
+            }
+
+        """
+        pr = PropertiesRouter(self.api_url, self.api_headers, self.ssl_verify)
+        return pr.list_custom_properties(self.uid)
+
+    def get_properties(self, params=None):
+        """
+        Get the configuration properties for the device class
+
+        Arguments:
+            params (dict): Search parameters for filter the properties on.
+
+        Returns:
+            dict(int, list(ZenossProperty)): ::
+
+            {
+                'total': Total count of properties returned.
+                'properties': List of ZenossProperty objects.
+            }
+
+        """
+        pr = PropertiesRouter(self.api_url, self.api_headers, self.ssl_verify)
+        return pr.get_properties(self.uid, params=params)
+
+    def get_property(self, zproperty):
+        """
+        Get a configuration property
+
+        Arguments:
+            zproperty (str): The id of the property to get
+
+        Returns:
+            ZenossProperty:
+        """
+        pr = PropertiesRouter(self.api_url, self.api_headers, self.ssl_verify)
+        return pr.get_property(self.uid, zproperty)
+
+    def get_custom_properties(self, params=None):
+        """
+        Get the cProperties for the device class
+
+        Arguments:
+            params (dict): Search parameters for filter the properties on.
+
+        Returns:
+            dict(int, list(ZenossCustomProperty)): ::
+
+            {
+                'total': Total count of properties returned.
+                'properties': List of ZenossCustomProperty objects.
+            }
+
+        """
+        pr = PropertiesRouter(self.api_url, self.api_headers, self.ssl_verify)
+        return pr.get_custom_properties(self.uid, params=params)
+
+    def get_custom_property(self, cproperty):
+        """
+        Get a custom property for the device class
+
+        Arguments:
+            cproperty (str): ID of the property to get.
+
+        Returns:
+            ZenossCustomProperty:
+        """
+        pr = PropertiesRouter(self.api_url, self.api_headers, self.ssl_verify)
+        return pr.get_custom_property(self.uid, cproperty)
+
+    def set_property(self, zproperty, value=None):
+        """
+        Set the value of a configuration property
+
+        Arguments:
+            zproperty (str): The id of the property to set a value for
+            value (str): The value to set for the property
+
+        Returns:
+            bool:
+        """
+        pr = PropertiesRouter(self.api_url, self.api_headers, self.ssl_verify)
+        return pr.set_property_value(self.uid, zproperty, value=value)
+
 
 class ZenossDevice(DeviceRouter):
     """
@@ -1549,6 +1682,138 @@ class ZenossDevice(DeviceRouter):
         )
 
         return response_data['jobId']
+
+    def list_properties(self, params=None, sort=None, sort_dir='ASC'):
+        """
+        List the configuration properties for the device
+
+        Arguments:
+            params (dict): Search parameters to filter the properties list on.
+            sort (str): Sort key for the properties list.
+            sort_dir (str): Sort direction, either ASC or DESC
+
+        Returns:
+            dict(int, list(dict)): ::
+
+            {
+                'total': Total count of properties returned.
+                'properties': List of properties found.
+            }
+
+        """
+        pr = PropertiesRouter(self.api_url, self.api_headers, self.ssl_verify)
+        return pr.list_properties(self.uid, params=params, sort=sort,
+                                  sort_dir=sort_dir)
+
+    def list_local_properties(self):
+        """
+        List the locally defined configuration properties for the device
+
+        Returns:
+            dict(int, list(dict)): ::
+
+            {
+                'total': Total count of properties returned.
+                'properties': List of properties found.
+            }
+
+        """
+        pr = PropertiesRouter(self.api_url, self.api_headers, self.ssl_verify)
+        return pr.list_local_properties(self.uid)
+
+    def list_custom_properties(self):
+        """
+        List the custom properties for the device
+
+        Returns:
+            dict(int, list(dict)): ::
+
+            {
+                'total': Total count of properties returned.
+                'properties': List of properties found.
+            }
+
+        """
+        pr = PropertiesRouter(self.api_url, self.api_headers, self.ssl_verify)
+        return pr.list_custom_properties(self.uid)
+
+    def get_properties(self, params=None):
+        """
+        Get the configuration properties for the device
+
+        Arguments:
+            params (dict): Search parameters for filter the properties on.
+
+        Returns:
+            dict(int, list(ZenossProperty)): ::
+
+            {
+                'total': Total count of properties returned.
+                'properties': List of ZenossProperty objects.
+            }
+
+        """
+        pr = PropertiesRouter(self.api_url, self.api_headers, self.ssl_verify)
+        return pr.get_properties(self.uid, params=params)
+
+    def get_property(self, zproperty):
+        """
+        Get a configuration property
+
+        Arguments:
+            zproperty (str): The id of the property to get
+
+        Returns:
+            ZenossProperty:
+        """
+        pr = PropertiesRouter(self.api_url, self.api_headers, self.ssl_verify)
+        return pr.get_property(self.uid, zproperty)
+
+    def get_custom_properties(self, params=None):
+        """
+        Get the cProperties for the device
+
+        Arguments:
+            params (dict): Search parameters for filter the properties on.
+
+        Returns:
+            dict(int, list(ZenossCustomProperty)): ::
+
+            {
+                'total': Total count of properties returned.
+                'properties': List of ZenossCustomProperty objects.
+            }
+
+        """
+        pr = PropertiesRouter(self.api_url, self.api_headers, self.ssl_verify)
+        return pr.get_custom_properties(self.uid, params=params)
+
+    def get_custom_property(self, cproperty):
+        """
+        Get a custom property for the device
+
+        Arguments:
+            cproperty (str): ID of the property to get.
+
+        Returns:
+            ZenossCustomProperty:
+        """
+        pr = PropertiesRouter(self.api_url, self.api_headers, self.ssl_verify)
+        return pr.get_custom_property(self.uid, cproperty)
+
+    def set_property(self, zproperty, value=None):
+        """
+        Set the value of a configuration property
+
+        Arguments:
+            zproperty (str): The id of the property to set a value for
+            value (str): The value to set for the property
+
+        Returns:
+            bool:
+        """
+        pr = PropertiesRouter(self.api_url, self.api_headers, self.ssl_verify)
+        return pr.set_property_value(self.uid, zproperty, value=value)
 
 
 class ZenossComponent(DeviceRouter):
