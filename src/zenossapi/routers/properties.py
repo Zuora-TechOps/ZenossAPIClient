@@ -363,21 +363,24 @@ class ZenossProperty(PropertiesRouter):
         self.type = property_data['type']
         self.options = []
 
-    def set_value(self, value=None):
+    def set_value(self, path=None, value=None):
         """
         Sets (or updates) the local value of a property
 
         Arguments:
-            value: The new value for the property, type varies by property.
+            path (str): UID of the node to set the property for.
+            value (str): The new value for the property, type varies by property.
 
         Returns:
             bool:
         """
+        if path:
+            self.path = path
+
         property_data = self.set_property_value(self.path, self.id, value=value)
 
         self.value = property_data['value']
         self.valueAsString = property_data['valueAsString']
-        self.path = property_data['path']
         self.islocal = 1
 
         return True
@@ -415,21 +418,24 @@ class ZenossCustomProperty(PropertiesRouter):
         self.type = property_data['type']
         self.options = property_data['options']
 
-    def set_value(self, value=None):
+    def set_value(self, path=None, value=None):
         """
         Sets (or updates) the local value of a custom property
 
         Arguments:
-            value: The new value for the property, type varies by property.
+            path (str): UID of the node to set the property for.
+            value (str): The new value for the property, type varies by property.
 
         Returns:
             bool:
         """
+        if path:
+            self.path = path
+
         property_data = self.set_property_value(self.path, self.id, value=value)
 
         self.value = property_data['value']
         self.valueAsString = property_data['valueAsString']
-        self.path = property_data['path']
         self.islocal = 1
 
         return True

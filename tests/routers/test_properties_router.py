@@ -143,7 +143,7 @@ class TestPropertiesRouter(object):
         prop = pr.get_custom_property('test.example.com', 'cDateTest')
         assert isinstance(prop, ZenossCustomProperty)
         assert prop.id == "cDateTest"
-        assert prop.path == "/"
+        assert prop.path == "Devices/"
 
     def test_properties_router_set_property_value(self, responses):
         responses_callback(responses)
@@ -158,10 +158,10 @@ class TestPropertiesRouter(object):
         pr = PropertiesRouter(url, headers, True)
         prop = pr.get_property('test.example.com', 'zWinTrustedRealm')
         assert prop.id == "zWinTrustedRealm"
-        assert prop.path == "/"
-        assert prop.set_value(value='Westeros')
+        assert prop.path == "Devices/"
+        assert prop.set_value(path='Devices/Server/TEST/devices/test.example.com', value='Westeros')
         assert prop.value == "Westeros"
-        assert prop.path == "/Server/TEST/devices/test.example.com"
+        assert prop.path == "Devices/Server/TEST/devices/test.example.com"
 
     def test_properties_router_zenossproperty_delete(self, responses):
         responses_callback(responses)
@@ -171,7 +171,7 @@ class TestPropertiesRouter(object):
         prop = props['properties'][0]
         assert prop.islocal == 1
         assert prop.value == "Westeros"
-        assert prop.path == "/Server/TEST/devices/test.example.com"
+        assert prop.path == "Devices/Server/TEST/devices/test.example.com"
         assert prop.delete()
         assert prop.islocal == 0
         assert prop.id == "zWinTrustedRealm"
@@ -193,10 +193,10 @@ class TestPropertiesRouter(object):
         prop = props['properties'][0]
         assert prop.id == "cDateTest"
         assert prop.value == "1900/01/01 00:00:00 US/Central"
-        assert prop.path == "/"
-        assert prop.set_value(value="2017/12/19 00:00:00 US/Pacific")
+        assert prop.path == "Devices/"
+        assert prop.set_value(path='Devices/Server/TEST/devices/test.example.com', value="2017/12/19 00:00:00 US/Pacific")
         assert prop.value == "2017/12/19 00:00:00 US/Pacific"
-        assert prop.path == "/Server/TEST/devices/test.example.com"
+        assert prop.path == "Devices/Server/TEST/devices/test.example.com"
 
     def test_properties_router_zenosscustomproperty_delete(self, responses):
         responses_callback(responses)
@@ -205,7 +205,7 @@ class TestPropertiesRouter(object):
         props = pr.get_custom_properties('test.example.com', params=dict(id='cDateTest', islocal=1))
         prop = props['properties'][0]
         assert prop.islocal == 1
-        assert prop.path == "/Server/TEST/devices/test.example.com"
+        assert prop.path == "Devices/Server/TEST/devices/test.example.com"
         assert prop.value == "2017/12/19 00:00:00 US/Pacific"
         assert prop.delete()
         assert prop.islocal == 0
