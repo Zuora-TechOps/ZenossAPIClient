@@ -359,7 +359,7 @@ class ZenossProperty(PropertiesRouter):
         self.label = property_data['label']
         self.value = property_data['value']
         self.valueAsString = property_data['valueAsString']
-        self.path = property_data['path']
+        self.path = 'Devices{0}'.format(property_data['path'])
         self.type = property_data['type']
         self.options = []
 
@@ -411,7 +411,7 @@ class ZenossCustomProperty(PropertiesRouter):
         self.label = property_data['label']
         self.value = property_data['value']
         self.valueAsString = property_data['valueAsString']
-        self.path = property_data['path']
+        self.path = 'Devices{0}'.format(property_data['path'])
         self.type = property_data['type']
         self.options = property_data['options']
 
