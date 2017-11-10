@@ -2,8 +2,10 @@ import json
 import pytest
 from zenossapi.apiclient import ZenossAPIClientError
 from zenossapi.routers.device import DeviceRouter, ZenossDeviceClass, ZenossDevice, ZenossComponent
+from zenossapi.routers.properties import ZenossProperty, ZenossCustomProperty
 from zenossapi.routers.template import ZenossTemplate
 import resp_json
+import properties_resp
 
 pytest_plugins = "pytest-responses"
 url = 'https://zenoss/zport/dmd'
@@ -124,6 +126,34 @@ def request_callback(request):
 
     def deleteComponents(rdata):
         return resp_json.delete_c
+
+    def getZenProperties(rdata):
+        if rdata['params']:
+            if 'id' in rdata['params']:
+                if 'islocal' in rdata['params']:
+                    return properties_resp.get_local_prop
+                else:
+                    return properties_resp.get_prop
+            elif 'islocal' in rdata['params']:
+                return properties_resp.local_props
+
+        return properties_resp.props
+
+    def getCustomProperties(rdata):
+        if rdata['params'] and 'id' in rdata['params']:
+            if 'islocal' in rdata['params']:
+                return properties_resp.custom_local_props
+
+        return properties_resp.custom_props
+
+    def setZenProperty(rdata):
+        if rdata['zProperty'] == "zWinTrustedRealm":
+            return properties_resp.set_prop
+        elif rdata['zProperty'] == "cDateTest":
+            return properties_resp.set_custom_prop
+
+    def deleteZenProperty(rdata):
+        return properties_resp.delete_prop
 
     if rdata['method'] in ['setBoundTemplates', 'bindOrUnbindTemplate',
                            'resetBoundTemplates', 'renameDevice',
@@ -253,6 +283,192 @@ class TestDeviceRouter(object):
         dc = dr.get_device_class('Server/TEST')
         resp = dc.add_device('test2.example.com')
         assert resp == "721739ae-2b1d-4613-91e9-681f134a2c49"
+
+    def test_device_router_zenossdeviceclass_list_properties(self, responses):
+        responses.add_callback(
+            responses.POST,
+            '{0}/properties_router'.format(url),
+            callback=request_callback,
+            content_type='application/json',
+        )
+        responses.add_callback(
+            responses.POST,
+            '{0}/device_router'.format(url),
+            callback=request_callback,
+            content_type='application/json',
+        )
+
+        dr = DeviceRouter(url, headers, True)
+        dc = dr.get_device_class('Server/TEST')
+        props = dc.list_properties()
+        assert props['total'] == 4
+        assert len(props['properties']) == 4
+        assert props['properties'][0]['id'] == "zAggregatorCollectionInterval"
+
+    def test_device_router_zenossdeviceclass_list_local_properties(self, responses):
+        responses.add_callback(
+            responses.POST,
+            '{0}/properties_router'.format(url),
+            callback=request_callback,
+            content_type='application/json',
+        )
+        responses.add_callback(
+            responses.POST,
+            '{0}/device_router'.format(url),
+            callback=request_callback,
+            content_type='application/json',
+        )
+
+        dr = DeviceRouter(url, headers, True)
+        dc = dr.get_device_class('Server/TEST')
+        props = dc.list_local_properties()
+        assert props['total'] == 2
+        assert len(props['properties']) == 2
+        assert props['properties'][0]['id'] == "zMySQLConnectionString"
+
+    def test_device_router_zenossdeviceclass_list_custom_properites(self, responses):
+        responses.add_callback(
+            responses.POST,
+            '{0}/properties_router'.format(url),
+            callback=request_callback,
+            content_type='application/json',
+        )
+        responses.add_callback(
+            responses.POST,
+            '{0}/device_router'.format(url),
+            callback=request_callback,
+            content_type='application/json',
+        )
+
+        dr = DeviceRouter(url, headers, True)
+        dc = dr.get_device_class('Server/TEST')
+        props = dc.list_custom_properties()
+        assert props['total'] == 1
+        assert len(props['properties']) == 1
+        assert props['properties'][0]['id'] == "cDateTest"
+        assert props['properties'][0]['path'] == "/"
+
+    def test_device_router_zenossdeviceclass_get_properties(self, responses):
+        responses.add_callback(
+            responses.POST,
+            '{0}/properties_router'.format(url),
+            callback=request_callback,
+            content_type='application/json',
+        )
+        responses.add_callback(
+            responses.POST,
+            '{0}/device_router'.format(url),
+            callback=request_callback,
+            content_type='application/json',
+        )
+
+        dr = DeviceRouter(url, headers, True)
+        dc = dr.get_device_class('Server/TEST')
+        props = dc.get_properties()
+        assert props['total'] == 4
+        assert len(props['properties']) == 4
+        assert isinstance(props['properties'][0], ZenossProperty)
+        assert props['properties'][0].id == "zAggregatorCollectionInterval"
+
+    def test_device_router_zenossdeviceclass_get_property(self, responses):
+        responses.add_callback(
+            responses.POST,
+            '{0}/properties_router'.format(url),
+            callback=request_callback,
+            content_type='application/json',
+        )
+        responses.add_callback(
+            responses.POST,
+            '{0}/device_router'.format(url),
+            callback=request_callback,
+            content_type='application/json',
+        )
+
+        dr = DeviceRouter(url, headers, True)
+        dc = dr.get_device_class('Server/TEST')
+        prop = dc.get_property('zWinTrustedRealm')
+        assert isinstance(prop, ZenossProperty)
+        assert prop.id == 'zWinTrustedRealm'
+
+    def test_device_router_zenossdeviceclass_get_custom_properties(self, responses):
+        responses.add_callback(
+            responses.POST,
+            '{0}/properties_router'.format(url),
+            callback=request_callback,
+            content_type='application/json',
+        )
+        responses.add_callback(
+            responses.POST,
+            '{0}/device_router'.format(url),
+            callback=request_callback,
+            content_type='application/json',
+        )
+
+        dr = DeviceRouter(url, headers, True)
+        dc = dr.get_device_class('Server/TEST')
+        props = dc.get_custom_properties()
+        assert props['total'] == 1
+        assert len(props['properties']) == 1
+        assert isinstance(props['properties'][0], ZenossCustomProperty)
+        assert props['properties'][0].id == "cDateTest"
+
+    def test_device_router_zenossdeviceclass_get_custom_property(self, responses):
+        responses.add_callback(
+            responses.POST,
+            '{0}/properties_router'.format(url),
+            callback=request_callback,
+            content_type='application/json',
+        )
+        responses.add_callback(
+            responses.POST,
+            '{0}/device_router'.format(url),
+            callback=request_callback,
+            content_type='application/json',
+        )
+
+        dr = DeviceRouter(url, headers, True)
+        dc = dr.get_device_class('Server/TEST')
+        prop = dc.get_custom_property('zWinTrustedRealm')
+        assert isinstance(prop, ZenossCustomProperty)
+        assert prop.id == "cDateTest"
+        assert prop.path == "Devices/"
+
+    def test_device_router_zenossdeviceclass_set_property(self, responses):
+        responses.add_callback(
+            responses.POST,
+            '{0}/properties_router'.format(url),
+            callback=request_callback,
+            content_type='application/json',
+        )
+        responses.add_callback(
+            responses.POST,
+            '{0}/device_router'.format(url),
+            callback=request_callback,
+            content_type='application/json',
+        )
+
+        dr = DeviceRouter(url, headers, True)
+        dc = dr.get_device_class('Server/TEST')
+        prop = dc.set_property('zWinTrustedRealm', value='Westeros')
+        assert prop['value'] == "Westeros"
+
+    def test_device_router_zenossdeviceclass_delete_property(self, responses):
+        responses.add_callback(
+            responses.POST,
+            '{0}/properties_router'.format(url),
+            callback=request_callback,
+            content_type='application/json',
+        )
+        responses.add_callback(
+            responses.POST,
+            '{0}/device_router'.format(url),
+            callback=request_callback,
+            content_type='application/json',
+        )
+
+        dr = DeviceRouter(url, headers, True)
+        dc = dr.get_device_class('Server/TEST')
+        assert dc.delete_property('zWinTrustedRealm')
 
     def test_device_router_zenossdevice_list_components(self, responses):
         responses_callback(responses)
@@ -568,6 +784,201 @@ class TestDeviceRouter(object):
         d = dc.get_device('test.example.com')
         resp = d.remodel()
         assert resp == "8735c0ba-0091-474d-8475-2ae4217aba32"
+
+    def test_device_router_zenossdevice_list_properties(self, responses):
+        responses.add_callback(
+            responses.POST,
+            '{0}/properties_router'.format(url),
+            callback=request_callback,
+            content_type='application/json',
+        )
+        responses.add_callback(
+            responses.POST,
+            '{0}/device_router'.format(url),
+            callback=request_callback,
+            content_type='application/json',
+        )
+
+        dr = DeviceRouter(url, headers, True)
+        dc = dr.get_device_class('Server/TEST')
+        d = dc.get_device('test.example.com')
+        props = d.list_properties()
+        assert props['total'] == 4
+        assert len(props['properties']) == 4
+        assert props['properties'][0]['id'] == "zAggregatorCollectionInterval"
+
+    def test_device_router_zenossdevice_list_local_properties(self, responses):
+        responses.add_callback(
+            responses.POST,
+            '{0}/properties_router'.format(url),
+            callback=request_callback,
+            content_type='application/json',
+        )
+        responses.add_callback(
+            responses.POST,
+            '{0}/device_router'.format(url),
+            callback=request_callback,
+            content_type='application/json',
+        )
+
+        dr = DeviceRouter(url, headers, True)
+        dc = dr.get_device_class('Server/TEST')
+        d = dc.get_device('test.example.com')
+        props = d.list_local_properties()
+        assert props['total'] == 2
+        assert len(props['properties']) == 2
+        assert props['properties'][0]['id'] == "zMySQLConnectionString"
+
+    def test_device_router_zenossdevice_list_custom_properites(self, responses):
+        responses.add_callback(
+            responses.POST,
+            '{0}/properties_router'.format(url),
+            callback=request_callback,
+            content_type='application/json',
+        )
+        responses.add_callback(
+            responses.POST,
+            '{0}/device_router'.format(url),
+            callback=request_callback,
+            content_type='application/json',
+        )
+
+        dr = DeviceRouter(url, headers, True)
+        dc = dr.get_device_class('Server/TEST')
+        d = dc.get_device('test.example.com')
+        props = d.list_custom_properties()
+        assert props['total'] == 1
+        assert len(props['properties']) == 1
+        assert props['properties'][0]['id'] == "cDateTest"
+        assert props['properties'][0]['path'] == "/"
+
+    def test_device_router_zenossdevice_get_properties(self, responses):
+        responses.add_callback(
+            responses.POST,
+            '{0}/properties_router'.format(url),
+            callback=request_callback,
+            content_type='application/json',
+        )
+        responses.add_callback(
+            responses.POST,
+            '{0}/device_router'.format(url),
+            callback=request_callback,
+            content_type='application/json',
+        )
+
+        dr = DeviceRouter(url, headers, True)
+        dc = dr.get_device_class('Server/TEST')
+        d = dc.get_device('test.example.com')
+        props = d.get_properties()
+        assert props['total'] == 4
+        assert len(props['properties']) == 4
+        assert isinstance(props['properties'][0], ZenossProperty)
+        assert props['properties'][0].id == "zAggregatorCollectionInterval"
+
+    def test_device_router_zenossdevice_get_property(self, responses):
+        responses.add_callback(
+            responses.POST,
+            '{0}/properties_router'.format(url),
+            callback=request_callback,
+            content_type='application/json',
+        )
+        responses.add_callback(
+            responses.POST,
+            '{0}/device_router'.format(url),
+            callback=request_callback,
+            content_type='application/json',
+        )
+
+        dr = DeviceRouter(url, headers, True)
+        dc = dr.get_device_class('Server/TEST')
+        d = dc.get_device('test.example.com')
+        prop = d.get_property('zWinTrustedRealm')
+        assert isinstance(prop, ZenossProperty)
+        assert prop.id == 'zWinTrustedRealm'
+
+    def test_device_router_zenossdevice_get_custom_properties(self, responses):
+        responses.add_callback(
+            responses.POST,
+            '{0}/properties_router'.format(url),
+            callback=request_callback,
+            content_type='application/json',
+        )
+        responses.add_callback(
+            responses.POST,
+            '{0}/device_router'.format(url),
+            callback=request_callback,
+            content_type='application/json',
+        )
+
+        dr = DeviceRouter(url, headers, True)
+        dc = dr.get_device_class('Server/TEST')
+        d = dc.get_device('test.example.com')
+        props = d.get_custom_properties()
+        assert props['total'] == 1
+        assert len(props['properties']) == 1
+        assert isinstance(props['properties'][0], ZenossCustomProperty)
+        assert props['properties'][0].id == "cDateTest"
+
+    def test_device_router_zenossdevice_get_custom_property(self, responses):
+        responses.add_callback(
+            responses.POST,
+            '{0}/properties_router'.format(url),
+            callback=request_callback,
+            content_type='application/json',
+        )
+        responses.add_callback(
+            responses.POST,
+            '{0}/device_router'.format(url),
+            callback=request_callback,
+            content_type='application/json',
+        )
+
+        dr = DeviceRouter(url, headers, True)
+        dc = dr.get_device_class('Server/TEST')
+        d = dc.get_device('test.example.com')
+        prop = d.get_custom_property('zWinTrustedRealm')
+        assert isinstance(prop, ZenossCustomProperty)
+        assert prop.id == "cDateTest"
+        assert prop.path == "Devices/"
+
+    def test_device_router_zenossdevice_set_property(self, responses):
+        responses.add_callback(
+            responses.POST,
+            '{0}/properties_router'.format(url),
+            callback=request_callback,
+            content_type='application/json',
+        )
+        responses.add_callback(
+            responses.POST,
+            '{0}/device_router'.format(url),
+            callback=request_callback,
+            content_type='application/json',
+        )
+
+        dr = DeviceRouter(url, headers, True)
+        dc = dr.get_device_class('Server/TEST')
+        d = dc.get_device('test.example.com')
+        prop = d.set_property('zWinTrustedRealm', value='Westeros')
+        assert prop['value'] == "Westeros"
+
+    def test_device_router_zenossdevice_delete_property(self, responses):
+        responses.add_callback(
+            responses.POST,
+            '{0}/properties_router'.format(url),
+            callback=request_callback,
+            content_type='application/json',
+        )
+        responses.add_callback(
+            responses.POST,
+            '{0}/device_router'.format(url),
+            callback=request_callback,
+            content_type='application/json',
+        )
+
+        dr = DeviceRouter(url, headers, True)
+        dc = dr.get_device_class('Server/TEST')
+        d = dc.get_device('test.example.com')
+        assert d.delete_property('zWinTrustedRealm')
 
     def test_device_router_zenosscomponent_set_monitored(self, responses):
         responses_callback(responses)
