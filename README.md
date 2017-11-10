@@ -10,6 +10,12 @@ Thus `get` methods will always return an object, `list` methods will return data
 All methods to add or create start with `add`, all remove or delete start with `delete`.
 As much as possible the methods try to hide the idiosyncrasies of the JSON API, and to do the work for you, for example by letting you use a device name instead of having to provide the full device UID for every call.
 
+## Installing
+
+```
+pip install ZenossAPIClient
+```
+
 ## Using
 
 ```
