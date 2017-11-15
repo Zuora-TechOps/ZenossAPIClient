@@ -26,10 +26,15 @@ def request_callback(request):
         return monitor_resp.tree
 
     def getInfo(rdata):
-        return monitor_resp.collector
+        if rdata['id'] == "newcollector":
+            return monitor_resp.newcollector
+        return monitor_resp.testcollector
 
     def getCollector(rdata):
         return monitor_resp.params
+
+    def addCollector(rdata):
+        return monitor_resp.add
 
     method = locals()[rdata['method']]
     resp_body = method(rdata['data'][0])
@@ -160,3 +165,32 @@ class TestMonitorRouter(object):
         zh = mr.get_hub('testhub')
         resp = zh.get_collector('badcollector')
         assert resp is None
+
+    def test_monitor_router_zenosshub_add_collector(self, responses):
+        responses_callback(responses)
+
+        mr = MonitorRouter(url, headers, False)
+        zh = mr.get_hub('testhub')
+        resp = zh.add_collector('newcollector', source='testcollector', pool='TEST')
+        assert isinstance(resp, ZenossCollector)
+        assert resp.name == "newcollector"
+        assert resp.devcount == 0
+        assert resp.text == "newcollector"
+        assert resp.path == "/zport/dmd/Monitors/Performance/newcollector"
+        assert resp.id == ".zport.dmd.Monitors.Performance.newcollector"
+        assert resp.configCycleInterval == 360
+        assert resp.pingCycleInterval == 60
+        assert resp.discoveryNetworks == ""
+        assert resp.description == ""
+        assert resp.modelerCycleInterval == 720
+        assert resp.processCycleInterval == 180
+        assert resp.meta_type == "PerformanceConf"
+        assert resp.wmiqueryTimeout == 100
+        assert resp.statusCycleInterval == 60
+        assert resp.eventlogCycleInterval == 60
+        assert resp.wmibatchSize == 10
+        assert resp.pingTimeOut == 1.5
+        assert resp.winCycleInterval == 60
+        assert resp.pingTries == 2
+        assert resp.inspector_type == "PerformanceConf"
+        assert resp.zenProcessParallelJobs == 10
