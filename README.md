@@ -30,4 +30,4 @@ In [7]: print remodel_job
 9ba5c8d7-58de-4f18-96fe-d362841910d3
 ```
 
-Supports the Zenoss JobsRouter, DeviceRouter, TemplateRouter, EventsRouter, and PropertiesRouter so far.
+Supports the Zenoss JobsRouter, DeviceRouter, TemplateRouter, EventsRouter, PropertiesRouter, and MonitorRouter so far.
