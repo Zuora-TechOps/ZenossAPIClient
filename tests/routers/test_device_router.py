@@ -1,5 +1,6 @@
 import json
 import pytest
+import warnings
 from zenossapi.apiclient import ZenossAPIClientError
 from zenossapi.routers.device import DeviceRouter, ZenossDeviceClass, ZenossDevice, ZenossComponent
 from zenossapi.routers.properties import ZenossProperty, ZenossCustomProperty
@@ -479,6 +480,15 @@ class TestDeviceRouter(object):
         resp = d.list_components()
         assert resp['total'] == 1
         assert resp['components'][0] == "hw/cpus/0"
+
+    def test_device_router_zenossdevice_list_components_bad_filter(self, responses):
+        responses_callback(responses)
+
+        dr = DeviceRouter(url, headers, True)
+        dc = dr.get_device_class('Server/TEST')
+        d = dc.get_device('test.example.com')
+        with pytest.warns(UserWarning):
+            resp = d.list_components(name='foo')
 
     def test_device_router_zenossdevice_get_components(self, responses):
         responses_callback(responses)

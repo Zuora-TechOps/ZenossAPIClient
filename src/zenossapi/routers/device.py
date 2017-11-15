@@ -1064,7 +1064,8 @@ class ZenossDevice(DeviceRouter):
         """
         if name and not keys:
             warnings.warn("Filtering by name also requires a list of keys", UserWarning)
-            
+            name = None
+
         components_data = self._router_request(
             self._make_request_data(
                 'getComponents',
