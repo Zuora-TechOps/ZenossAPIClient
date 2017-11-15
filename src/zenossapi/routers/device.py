@@ -5,6 +5,7 @@ Zenoss device_router
 """
 
 import re
+import warnings
 from zenossapi.apiclient import ZenossAPIClientError
 from zenossapi.routers import ZenossRouter
 from zenossapi.routers.properties import PropertiesRouter
@@ -1037,7 +1038,7 @@ class ZenossDevice(DeviceRouter):
         self.parent = self.uid.split('/devices/')[0]
 
     def list_components(self, meta_type=None, start=0, limit=50, sort='name',
-                        dir='ASC', name=None):
+                        dir='ASC', keys=None, name=None):
         """
         Get a list of all the components on a device. Supports pagination.
 
@@ -1047,7 +1048,9 @@ class ZenossDevice(DeviceRouter):
             limit (int): The number of results to return, default 50
             sort (str): Sort key for the list, default is 'name'
             dir (str): Sort order, either 'ASC' or 'DESC', default is 'ASC'
-            name (str): Regular expression pattern to filter on
+            keys (list): Keys to include in the returned data
+            name (str): Regular expression pattern to filter on, requries
+                the keys parameter
 
         Returns:
             dict(int, str, list): ::
@@ -1059,6 +1062,9 @@ class ZenossDevice(DeviceRouter):
             }
 
         """
+        if name and not keys:
+            warnings.warn("Filtering by name also requires a list of keys", UserWarning)
+            
         components_data = self._router_request(
             self._make_request_data(
                 'getComponents',
@@ -1069,6 +1075,7 @@ class ZenossDevice(DeviceRouter):
                     limit=limit,
                     sort=sort,
                     dir=dir,
+                    keys=keys,
                     name=name,
                 )
             )
@@ -1087,9 +1094,10 @@ class ZenossDevice(DeviceRouter):
         return components_list
 
     def get_components(self, meta_type=None, start=0, limit=50, sort='name',
-                       dir='ASC', name=None):
+                       dir='ASC'):
         """
-        Get component objects for all components on the device. Supports Pagination.
+        Get component objects for all components on the device.
+        Supports Pagination.
 
         Arguments:
             meta_type (str): Meta type of components to list
@@ -1097,14 +1105,12 @@ class ZenossDevice(DeviceRouter):
             limit (int): The number of results to return, default 50
             sort (str): Sort key for the list, default is 'name'
             dir (str): Sort order, either 'ASC' or 'DESC', default is 'ASC'
-            name (str): Regular expression pattern to filter on
 
         Returns:
             list(ZenossComponent):
         """
         components_list = self.list_components(meta_type=meta_type, start=start,
-                                               limit=limit, sort=sort, dir=dir,
-                                               name=name)
+                                               limit=limit, sort=sort, dir=dir)
 
         components = []
         for component in components_list['components']:
