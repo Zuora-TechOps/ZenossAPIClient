@@ -58,7 +58,7 @@ tree = {
     "method": "getTree"
 }
 
-collector = {
+testcollector = {
     "uuid": "0de03747-255e-4efb-ac1b-d4b59dc3d277",
     "action": "MonitorRouter",
     "result": {
@@ -73,6 +73,29 @@ collector = {
             "type": "collector",
             "id": ".zport.dmd.Monitors.Performance.testcollector",
             "uid": "/zport/dmd/Monitors/Performance/testcollector"
+        },
+        "success": True
+    },
+    "tid": 1,
+    "type": "rpc",
+    "method": "getInfo"
+}
+
+newcollector = {
+    "uuid": "0de03747-255e-4efb-ac1b-d4b59dc3d277",
+    "action": "MonitorRouter",
+    "result": {
+        "data": {
+            "ccbacked": True,
+            "leaf": False,
+            "name": "newcollector",
+            "text": "newcollector",
+            "children": [],
+            "devcount": 0,
+            "path": "/zport/dmd/Monitors/Performance/newcollector",
+            "type": "collector",
+            "id": ".zport.dmd.Monitors.Performance.newcollector",
+            "uid": "/zport/dmd/Monitors/Performance/newcollector"
         },
         "success": True
     },
@@ -111,4 +134,36 @@ params = {
     "tid": 1,
     "type": "rpc",
     "method": "getCollector"
+}
+
+add = {
+    "uuid": "1a539847-a89c-4047-9385-4ff697ec8195",
+    "action": "MonitorRouter",
+    "result": {
+        "data": {
+            "configCycleInterval": 360,
+            "pingCycleInterval": 60,
+            "discoveryNetworks": "",
+            "description": "",
+            "modelerCycleInterval": 720,
+            "processCycleInterval": 180,
+            "meta_type": "PerformanceConf",
+            "wmiqueryTimeout": 100,
+            "statusCycleInterval": 60,
+            "eventlogCycleInterval": 60,
+            "name": "newcollector",
+            "wmibatchSize": 10,
+            "pingTimeOut": 1.5,
+            "winCycleInterval": 60,
+            "pingTries": 2,
+            "inspector_type": "PerformanceConf",
+            "zenProcessParallelJobs": 10,
+            "id": "newcollector",
+            "uid": "/zport/dmd/Monitors/Performance/newcollector"
+        },
+        "success": True
+    },
+    "tid": 1,
+    "type": "rpc",
+    "method": "addCollector"
 }

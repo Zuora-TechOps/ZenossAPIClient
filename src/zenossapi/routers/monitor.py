@@ -198,13 +198,60 @@ class ZenossHub(MonitorRouter):
 
         return None
 
+    def add_collector(self, name, source=None, pool=None):
+        """
+        Add a new collector to the hub.
+
+        Arguments:
+            name (str): Name of the new collector
+            source (str): Name of the existing collector to use as a template
+            pool (str): The resource pool to place the collector in
+
+        Returns:
+            ZenossCollector:
+        """
+        if not source:
+            raise ZenossAPIClientError("You must specify a collector to use as a template.")
+
+        if not pool:
+            raise ZenossAPIClientError("You must specify a resource pool for the collector.")
+
+        collector_params = self._router_request(
+            self._make_request_data(
+                'addCollector',
+                data=dict(
+                    id=name,
+                    sourceId=source,
+                    hubId=self.name,
+                    poolId=pool
+                )
+            )
+        )
+
+        collector_data = self._router_request(
+            self._make_request_data(
+                'getInfo',
+                data=dict(
+                    id=name
+                )
+            )
+        )
+
+        return ZenossCollector(
+            self.api_url,
+            self.api_headers,
+            self.ssl_verify,
+            collector_data=collector_data['data'],
+            collector_params=collector_params
+        )
+
 
 class ZenossCollector(MonitorRouter):
     """
     Class for Zenoss collector objects
     """
 
-    def __init__(self, url, headers, ssl_verify, collector_data):
+    def __init__(self, url, headers, ssl_verify, collector_data, collector_params=None):
         super(ZenossCollector, self).__init__(url, headers, ssl_verify)
 
         self.uid = collector_data['uid'].replace('/zport/dmd/', '', 1)
@@ -215,14 +262,16 @@ class ZenossCollector(MonitorRouter):
         self.path = collector_data['path']
         self.id = collector_data['id']
 
-        collector_params = self._router_request(
-            self._make_request_data(
-                'getCollector',
-                data=dict(
-                    collectorString=self.name
+        if not collector_params:
+            collector_params = self._router_request(
+                self._make_request_data(
+                    'getCollector',
+                    data=dict(
+                        collectorString=self.name
+                    )
                 )
             )
-        )
+
         self.configCycleInterval = collector_params['data']['configCycleInterval']
         self.pingCycleInterval = collector_params['data']['pingCycleInterval']
         self.discoveryNetworks = collector_params['data']['discoveryNetworks']
