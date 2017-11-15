@@ -33,6 +33,14 @@ Jobs Router
     :undoc-members:
     :show-inheritance:
 
+Monitor Router
+--------------
+
+.. automodule:: zenossapi.routers.monitor
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 Properties Router
 -----------------
 
