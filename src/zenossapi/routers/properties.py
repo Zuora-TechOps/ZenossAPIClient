@@ -130,7 +130,7 @@ class PropertiesRouter(ZenossRouter):
                 'properties': List of properties found.
             }
         """
-        return self.list_properties(uid, params=dict(islocal=1))
+        return self.list_properties(uid, params=dict(islocal='1'))
 
     def get_local_properties(self, uid):
         """
@@ -381,7 +381,7 @@ class ZenossProperty(PropertiesRouter):
 
         self.value = property_data['value']
         self.valueAsString = property_data['valueAsString']
-        self.islocal = 1
+        self.islocal = '1'
 
         return True
 
@@ -436,7 +436,7 @@ class ZenossCustomProperty(PropertiesRouter):
 
         self.value = property_data['value']
         self.valueAsString = property_data['valueAsString']
-        self.islocal = 1
+        self.islocal = '1'
 
         return True
 
