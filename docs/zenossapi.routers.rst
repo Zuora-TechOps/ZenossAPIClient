@@ -17,6 +17,14 @@ Device Router
     :undoc-members:
     :show-inheritance:
 
+DeviceManagement Router
+-----------------------
+
+.. automodule:: zenossapi.routers.devicemanagement
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 Events Router
 -------------
 
