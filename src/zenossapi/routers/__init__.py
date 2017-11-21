@@ -15,6 +15,15 @@ class ZenossRouter(object):
         self.api_endpoint = endpoint
         self.api_action = action
 
+    def _check_uid(self, uid):
+        if not uid.startswith('Devices'):
+            if uid.startswith('/'):
+                uid = 'Devices{0}'.format(uid)
+            else:
+                uid = 'Devices/{0}'.format(uid)
+
+        return uid
+
     def _make_request_data(self, method, data):
         return dict(
             action=self.api_action,
