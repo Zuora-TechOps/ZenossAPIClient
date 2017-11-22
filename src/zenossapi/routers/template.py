@@ -969,7 +969,7 @@ class ZenossTemplate(TemplateRouter):
         Returns:
             dict:
         """
-        graph_uid = '{0}/graphDefs/{0}'.format(self.uid, graph)
+        graph_uid = '{0}/graphDefs/{1}'.format(self.uid, graph)
 
         return self._router_request(
             self._make_request_data(

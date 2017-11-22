@@ -2,7 +2,7 @@ from setuptools import find_packages, setup
 
 name = 'ZenossAPIClient'
 version = '0.2'
-release = '0.2.1'
+release = '0.2.2'
 
 setup(name=name,
       version=release,
