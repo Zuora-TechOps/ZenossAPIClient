@@ -959,6 +959,27 @@ class ZenossTemplate(TemplateRouter):
             '{}/graphDefs/{}'.format(self.uid, graph)
         )
 
+    def delete_graph(self, graph):
+        """
+        Delete a particular graph.
+
+        Arguments:
+            graph (str): The name of the graph to delete.
+
+        Returns:
+            dict:
+        """
+        graph_uid = '{0}/graphDefs/{0}'.format(self.uid, graph)
+
+        return self._router_request(
+            self._make_request_data(
+                'deleteGraphDefinition',
+                data=dict(
+                    uid=graph_uid,
+                )
+            )
+        )
+
 
 class ZenossDataSource(TemplateRouter):
     """
@@ -1302,6 +1323,22 @@ class ZenossGraph(TemplateRouter):
         self.name = graph_data['name']
         self.uid = graph_data['uid'].replace('/zport/dmd/', '', 1)
         self.parent = self.uid.split('/graphDefs/')[0]
+
+    def delete(self):
+        """
+        Delete the graph.
+
+        Returns:
+            dict:
+        """
+        return self._router_request(
+            self._make_request_data(
+                'deleteGraphDefinition',
+                data=dict(
+                    uid=self.uid,
+                )
+            )
+        )
 
     def get_points(self):
         """

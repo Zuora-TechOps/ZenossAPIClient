@@ -95,10 +95,11 @@ def request_callback(request):
                            'addDataPointToGraph', 'addDataSource',
                            'deleteDataSource', 'addThreshold',
                            'removeThreshold', 'addGraphDefinition',
-                           'addDataPoint', 'deleteDataPoint',
-                           'addThreshold', 'removeThreshold', 'setInfo',
+                           'deleteGraphDefinition', 'addDataPoint',
+                           'deleteDataPoint', 'addThreshold',
+                           'removeThreshold', 'addThresholdToGraph', 'setInfo',
                            'setGraphDefinition', 'setGraphPointSequence',
-                           'deleteGraphPoint', 'addThresholdToGraph']:
+                           'deleteGraphPoint']:
         resp_body = template_resp.success
     else:
         method = locals()[rdata['method']]
@@ -367,6 +368,14 @@ class TestTemplateRouter(object):
         assert isinstance(resp, ZenossGraph)
         assert resp.uid == "Devices/Server/TEST/rrdTemplates/FileSystem/graphDefs/Usage"
 
+    def test_template_router_zenosstemplate_delete_graph(self, responses):
+        responses_callback(responses)
+
+        tr = TemplateRouter(url, headers, True)
+        zt = tr.get_template('Server/TEST', 'FileSystem')
+        resp = zt.delete_graph('Usage')
+        assert resp['success']
+
     def test_template_router_zenossdatasource_list_data_points(self, responses):
         responses_callback(responses)
 
@@ -487,6 +496,15 @@ class TestTemplateRouter(object):
         zt = tr.get_template('Server/TEST', 'FileSystem')
         threshold = zt.get_threshold('90 percent used')
         resp = threshold.delete()
+        assert resp['success']
+
+    def test_template_router_zenossgraph_delete(self, responses):
+        responses_callback(responses)
+
+        tr = TemplateRouter(url, headers, True)
+        zt = tr.get_template('Server/TEST', 'FileSystem')
+        graph = zt.get_graph('Usage')
+        resp = graph.delete()
         assert resp['success']
 
     def test_template_router_zenossgraph_list_points(self, responses):
