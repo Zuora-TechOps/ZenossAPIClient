@@ -100,9 +100,15 @@ class Client(object):
         Arguments:
             router (str): The API router to use
         """
+        router_class = getattr(
+            self.routers[router],
+            '__router__',
+            '{0}Router'.format(router.capitalize())
+        )
+
         api_router = getattr(
             self.routers[router],
-            '{0}Router'.format(router.capitalize()),
+            router_class,
         )(
             self.api_url,
             self.api_headers,
@@ -122,9 +128,15 @@ class Client(object):
             list:
         """
         router_methods = []
+        router_class = getattr(
+            self.routers[router],
+            '__router__',
+            '{0}Router'.format(router.capitalize())
+        )
+
         for method in inspect.getmembers(
             getattr(self.routers[router],
-                    '{0}Router'.format(router.capitalize())),
+                    router_class),
             predicate=inspect.isroutine
         ):
             if method[0].startswith('__'):
