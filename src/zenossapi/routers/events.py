@@ -336,7 +336,7 @@ class EventsRouter(ZenossRouter):
         return events
 
     def add_event(self, summary, device, severity, component=None,
-                  event_class_key=None, event_class='/Status'):
+                  event_class_key='', event_class='/Status', **kwargs):
         """
         Create a new Zenoss event.
 
@@ -356,35 +356,41 @@ class EventsRouter(ZenossRouter):
             severity_num = self.event_severity_map[severity]
         else:
             severity_num = severity
+
+        event_spec = dict(
+            summary=summary,
+            device=device,
+            component=component,
+            severity=severity,
+            evclasskey=event_class_key,
+            evclass=event_class,
+            **kwargs
+        )
+
         self._router_request(
             self._make_request_data(
                 'add_event',
-                dict(
-                    summary=summary,
-                    device=device,
-                    component=component,
-                    severity=severity,
-                    evclasskey=event_class_key,
-                    evclass=event_class,
-                )
+                event_spec,
             )
         )
 
-        filter = dict(
+        ev_filter = dict(
             summary=summary,
             device=[device],
             component=[component] if component else None,
             severity=severity_num,
             eventClassKey=event_class_key,
+            **kwargs
         )
 
         event_data = self._query_events(
             limit=1,
-            params=filter,
+            params=ev_filter,
             keys=['evid']
         )
+        evid = event_data['events'][0]['evid']
 
-        return self.get_event_by_evid(event_data['events'][0]['evid'])
+        return self.get_event_by_evid(evid)
 
     def clear_heartbeats(self):
         """

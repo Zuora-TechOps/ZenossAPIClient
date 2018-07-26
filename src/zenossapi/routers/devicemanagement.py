@@ -8,6 +8,8 @@ from datetime import datetime as dt
 from zenossapi.apiclient import ZenossAPIClientError
 from zenossapi.routers import ZenossRouter
 
+__router__ = 'DeviceManagementRouter'
+
 
 class DeviceManagementRouter(ZenossRouter):
     """

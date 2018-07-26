@@ -17,3 +17,4 @@ gen
 /.cache
 /.eggs
 /.tox
+/.pytest_cache

@@ -1,11 +1,14 @@
+import os
 from setuptools import find_packages, setup
+import sys
+
+sys.path.insert(0, os.path.join(os.path.abspath(os.path.curdir), 'src'))
+from zenossapi import __version__, __release__
 
 name = 'ZenossAPIClient'
-version = '0.2'
-release = '0.2.2'
 
 setup(name=name,
-      version=release,
+      version=__release__,
       description='Zenoss API client module',
       long_description="""
 Python module for interacting with the Zenoss API an an object-oriented way.
@@ -41,5 +44,15 @@ device UID for every call.
       install_requires=[
           'python-dateutil>=2.6.1',
           'requests>=2.18.1',
-      ]
+      ],
+      command_options={
+          'build_sphinx': {
+              'project': ('setup.py', name),
+              'version': ('setup.py', __version__),
+              'release': ('setup.py', __release__),
+              'source_dir': ('setup.py', 'docs'),
+              'build_dir': ('setup.py', 'docs/_build'),
+              'config_dir': ('setup.py', 'docs'),
+          }
+      }
       )
