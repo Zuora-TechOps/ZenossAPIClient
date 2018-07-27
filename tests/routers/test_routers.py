@@ -1,4 +1,5 @@
 import pytest
+from requests.exceptions import ConnectionError
 from zenossapi.apiclient import ZenossAPIClientAuthenticationError, ZenossAPIClientError
 from zenossapi.routers import ZenossRouter
 
@@ -96,4 +97,15 @@ class TestBaseRouter(object):
 
         br = ZenossRouter(url, headers, True, 'test_router', 'TestRouter')
         with pytest.raises(ZenossAPIClientError, message='Request failed: 404 '):
+            resp = br._router_request({'data': dict()})
+
+    def test_routers_router_request_bad_host(self, responses):
+        responses.add(
+            responses.POST,
+            '{0}/test_router'.format(url),
+            body=ConnectionError('Failed to establish a new connection: [Errno 110] Connection timed out',)
+        )
+
+        br = ZenossRouter(url, headers, True, 'test_router', 'TestRouter')
+        with pytest.raises(ZenossAPIClientError, message='Unable to connect to Zenoss server {0}'.format(url)):
             resp = br._router_request({'data': dict()})
