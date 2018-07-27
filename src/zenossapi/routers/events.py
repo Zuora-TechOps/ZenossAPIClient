@@ -84,6 +84,19 @@ class EventsRouter(ZenossRouter):
             }
 
         """
+        valid_params = {'dedupid', 'evid', 'device', 'ipAddress', 'component',
+                        'eventClass', 'eventGroup', 'eventKey', 'facility',
+                        'severity', 'priority', 'summary', 'message',
+                        'stateChange', 'firstTime', 'lastTime', 'count',
+                        'prodState', 'DevicePriority', 'manager', 'agent',
+                        'DeviceClass', 'Location', 'Systems', 'DeviceGroups'}
+
+        if params:
+            param_keys = set(params.keys())
+            bad_params = param_keys.difference(valid_params)
+            for bad in bad_params:
+                params.pop(bad)
+
         events_data = self._router_request(
             self._make_request_data(
                 'query',
