@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import requests
+from requests.exceptions import ConnectionError
 from zenossapi.apiclient import ZenossAPIClientError, ZenossAPIClientAuthenticationError
 
 
@@ -38,12 +39,17 @@ class ZenossRouter(object):
         if not self.ssl_verify:
             requests.urllib3.disable_warnings()
 
-        response = requests.post(
-            '{0}/{1}'.format(self.api_url, self.api_endpoint),
-            headers=self.api_headers,
-            json=data,
-            verify=self.ssl_verify,
-        )
+        try:
+            response = requests.post(
+                '{0}/{1}'.format(self.api_url, self.api_endpoint),
+                headers=self.api_headers,
+                json=data,
+                verify=self.ssl_verify,
+            )
+        except ConnectionError as e:
+            raise ZenossAPIClientError(
+                'Unable to connect to Zenoss server {0}'.format(self.api_url)
+            )
 
         if response.ok:
             if response.url.find('login_form') > -1:
