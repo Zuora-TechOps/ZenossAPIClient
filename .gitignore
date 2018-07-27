@@ -18,3 +18,4 @@ gen
 /.eggs
 /.tox
 /.pytest_cache
+/build
