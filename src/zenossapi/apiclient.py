@@ -55,8 +55,9 @@ class Client(object):
             else:
                 ssl_verify = True
 
-        self.api_host = host
-        self.api_url = 'https://{0}/zport/dmd'.format(host)
+        # Allow a http:// hostname, assume https if none provided
+        self.api_host = host if '://' in host else 'https://'+host
+        self.api_url = '{0}/zport/dmd'.format(host)
         self.api_user = user
         self.ssl_verify = ssl_verify
         self.api_headers = {"Content-Type": "application/json"}
@@ -84,6 +85,7 @@ class Client(object):
         routers_path = os.path.join(
             os.path.dirname(os.path.abspath(__file__)), 'routers')
         file_list = os.listdir(routers_path)
+        file_list = [filename for filename in file_list if '.py' in filename]
         for fname in file_list:
             name, ext = fname.split('.')
             if name == "__init__":
