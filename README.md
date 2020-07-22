@@ -2,7 +2,7 @@
 
 [![Documentation Status](https://readthedocs.org/projects/zenossapiclient/badge/)](http://zenossapiclient.readthedocs.io/en/latest/)
 
-Python module for interacting with the Zenoss API an an object-oriented way.
+Python module for interacting with the Zenoss API in an object-oriented way.
 Tested with Zenoss 5.2.x, no guarantees for earlier versions...
 
 The philosophy here is to use objects to work with everything in the Zenoss API, and to try to normalize the various calls to the different routers.
