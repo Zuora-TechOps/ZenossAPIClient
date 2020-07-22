@@ -88,8 +88,13 @@ class TestEventsRouter(object):
         responses_callback(responses)
 
         er = EventsRouter(url, headers, True)
-        with pytest.raises(ZenossAPIClientError, message="Request failed: ServiceResponseError: Not Found"):
-            resp = er._get_details_by_evid("02420a11-0015-98b9-11e7-9d96ae35199f")
+        with pytest.raises(
+            ZenossAPIClientError,
+            match="Request failed: ServiceResponseError: Not Found"
+        ):
+            resp = er._get_details_by_evid(
+                "02420a11-0015-98b9-11e7-9d96ae35199f"
+            )
 
     def test_events_router_event_actions(self, responses):
         responses_callback(responses)
@@ -99,7 +104,10 @@ class TestEventsRouter(object):
 
     def test_events_router_event_actions_invalid(self):
         er = EventsRouter(url, headers, True)
-        with pytest.raises(ZenossAPIClientError, message="Unknown event action: terminate"):
+        with pytest.raises(
+            ZenossAPIClientError,
+            match="Unknown event action: terminate"
+        ):
             er._event_actions('terminate')
 
     def test_events_router_get_config(self, responses):
@@ -159,6 +167,45 @@ class TestEventsRouter(object):
 
     def test_events_router_add_event(self, responses):
         responses_callback(responses)
+
+        er = EventsRouter(url, headers, True)
+        resp = er.add_event(
+            "Out of Tea",
+            "Heart of Gold",
+            3,
+            component="Arthur Dent"
+        )
+        assert isinstance(resp, ZenossEvent)
+        assert resp.evid == "02420a11-000c-a561-11e7-ba9b510182b3"
+
+    def test_events_router_add_event_retry(self, responses):
+        # First response, adding the event.
+        responses.add(
+            responses.POST,
+            '{0}/evconsole_router'.format(url),
+            json=events_resp.success
+        )
+
+        # Second response, event not fully created.
+        responses.add(
+            responses.POST,
+            '{0}/evconsole_router'.format(url),
+            json=events_resp.success
+        )
+
+        # Third response, event now created.
+        responses.add(
+            responses.POST,
+            '{0}/evconsole_router'.format(url),
+            json=events_resp.add_event_evid_query
+        )
+
+        # Finally, event detail
+        responses.add(
+            responses.POST,
+            '{0}/evconsole_router'.format(url),
+            json=events_resp.add_event_detail
+        )
 
         er = EventsRouter(url, headers, True)
         resp = er.add_event(

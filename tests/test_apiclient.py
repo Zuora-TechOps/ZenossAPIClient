@@ -11,14 +11,16 @@ class TestZenossClient(object):
 
     def test_client_init(self):
         zc = zapi.Client(host=host, user=user, password=password)
-        assert zc.api_host == host
+        assert zc.api_host == "https://{0}".format(host)
         assert zc.api_url == 'https://{0}/zport/dmd'.format(host)
         assert zc.api_user == user
         assert zc.ssl_verify
 
     def test_client_get_routers(self):
         zc = zapi.Client(host=host, user=user, password=password)
-        zc.get_routers()
+        routers = zc.get_routers()
+        assert len(routers) == 7
+        assert "monitor" in routers
 
     def test_client_get_router(self):
         zc = zapi.Client(host=host, user=user, password=password)
