@@ -57,7 +57,7 @@ class Client(object):
 
         # Allow a http:// hostname, assume https if none provided
         self.api_host = host if '://' in host else 'https://'+host
-        self.api_url = '{0}/zport/dmd'.format(host)
+        self.api_url = '{0}/zport/dmd'.format(self.api_host)
         self.api_user = user
         self.ssl_verify = ssl_verify
         self.api_headers = {"Content-Type": "application/json"}

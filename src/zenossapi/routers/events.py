@@ -3,6 +3,7 @@
 """
 Zenoss evconsole_router
 """
+from time import sleep
 
 from zenossapi.apiclient import ZenossAPIClientError
 from zenossapi.routers import ZenossRouter
@@ -418,14 +419,29 @@ class EventsRouter(ZenossRouter):
             **kwargs
         )
 
-        event_data = self._query_events(
-            limit=1,
-            params=ev_filter,
-            keys=['evid']
-        )
-        evid = event_data['events'][0]['evid']
+        # In some cases the event may not be created and searchable immediately,
+        # this gives it a few tries just in case.
+        retries = 0
+        evid = None
+        while retries <= 5:
+            try:
+                event_data = self._query_events(
+                    limit=1,
+                    params=ev_filter,
+                    keys=['evid']
+                )
+                evid = event_data['events'][0]['evid']
+                retries = 6
+            except KeyError:
+                retries += 1
+                sleep(5)
 
-        return self.get_event_by_evid(evid)
+        if evid is not None:
+            return self.get_event_by_evid(evid)
+
+        raise ZenossAPIClientError(
+            "Request failed, no Event ID found for new event."
+        )
 
     def clear_heartbeats(self):
         """
