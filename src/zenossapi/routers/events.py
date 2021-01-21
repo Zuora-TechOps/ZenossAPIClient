@@ -46,8 +46,8 @@ class EventsRouter(ZenossRouter):
         )
 
     def _query_events(self, limit=10, start=0, sort='lastTime', sort_dir='DESC',
-                      params=None, exclude=None, keys=None,
-                      context=None, archive=False):
+                      params=None, exclude=None, keys=None, context=None,
+                      archive=False, validate_params=True, detail_format=False):
         """
         Get a list of events based on query parameters.
 
@@ -73,6 +73,8 @@ class EventsRouter(ZenossRouter):
             keys (list): List of keys to include in the return event data
             context (str): Device or device class uid as context for the query
             archive (bool): Search the events archive instead of active events
+            validate_params (bool): Check input params against known param list
+            detail_format (bool): Request detail format of return parameters
 
         Returns:
             dict(int, float, list(dict)): ::
@@ -113,7 +115,7 @@ class EventsRouter(ZenossRouter):
                         'summary',
                         'systems'}
 
-        if params:
+        if params and validate_params:
             param_keys = set(params.keys())
             bad_params = param_keys.difference(valid_params)
             for bad in bad_params:
@@ -127,6 +129,7 @@ class EventsRouter(ZenossRouter):
                     start=start,
                     sort=sort,
                     dir=sort_dir,
+                    detailFormat=detail_format,
                     params=params,
                     exclusion_filter=exclude,
                     keys=keys,
@@ -164,7 +167,7 @@ class EventsRouter(ZenossRouter):
         return event_data['event'][0]
 
     def _event_actions(self, action, evids=None, exclude_ids=None, params=None,
-                      context=None, last_change=None, limit=None, timeout=60):
+                       context=None, last_change=None, limit=None, timeout=60):
         """
         Close events by either passing a list of event ids or by a query.
 
