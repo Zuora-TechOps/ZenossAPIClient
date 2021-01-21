@@ -7,6 +7,7 @@ Zenoss API Client Class
 import inspect
 import os
 import urllib3
+from distutils.util import strtobool
 
 
 class ZenossAPIClientError(Exception):
@@ -20,7 +21,7 @@ class ZenossAPIClientAuthenticationError(Exception):
 class Client(object):
     """Client class to access the Zenoss JSON API"""
 
-    def __init__(self, host=None, user=None, password=None, ssl_verify=None):
+    def __init__(self, host=None, user=None, password=None, ssl_verify=None, collection_zone=None, api_key=None):
         """
         Create the client object to communicate with Zenoss. The authentication
         and ssl parameters can be pulled from the environment so that they
@@ -32,16 +33,28 @@ class Client(object):
             password (str): Zenoss user's password
             ssl_verify (bool): Whether to verify the SSL certificate or not.
                 Set to false when using servers with self-signed certs.
+            collection_zone (str): Zenoss Cloud collection zone
+            api_key (str): Zenoss Cloud api key
         """
         if not host:
             if 'ZENOSS_HOST' in os.environ:
                 host = os.environ['ZENOSS_HOST']
+
         if not user:
             if 'ZENOSS_USER' in os.environ:
                 user = os.environ['ZENOSS_USER']
+
         if not password:
             if 'ZENOSS_PASSWD' in os.environ:
                 password = os.environ['ZENOSS_PASSWD']
+
+        if not collection_zone:
+            if 'ZENOSS_COLLECTION_ZONE' in os.environ:
+                collection_zone = os.environ['ZENOSS_COLLECTION_ZONE']
+
+        if not api_key:
+            if 'ZENOSS_API_KEY' in os.environ:
+                api_key = os.environ['ZENOSS_API_KEY']
 
         if ssl_verify is None:
             if 'ZENOSS_SSL_VERIFY' in os.environ:
@@ -50,29 +63,27 @@ class Client(object):
                 ssl_verify = True
 
         if isinstance(ssl_verify, str):
-            if ssl_verify == "False":
-                ssl_verify = False
-            else:
-                ssl_verify = True
+            ssl_verify = bool(strtobool(ssl_verify))
 
-        # Allow a http:// hostname, assume https if none provided
-        self.api_host = host if '://' in host else 'https://'+host
+        if collection_zone:
+            host = '{0}/{1}'.format(host, collection_zone)
+
         self.api_url = '{0}/zport/dmd'.format(host)
-        self.api_user = user
         self.ssl_verify = ssl_verify
         self.api_headers = {"Content-Type": "application/json"}
-        self.router_list = []
         self.routers = dict()
 
         for router in self.get_routers():
-            self.router_list.append(router)
             self.routers[router] = __import__(
                 'zenossapi.routers.{0}'.format(router),
                 fromlist=[router])
 
-        if self.api_user and password:
+        if user and password:
             self.api_headers.update(urllib3.make_headers(
-                basic_auth='{0}:{1}'.format(self.api_user, password)))
+                basic_auth='{0}:{1}'.format(user, password)))
+
+        if api_key:
+            self.api_headers['z-api-key'] = api_key
 
     def get_routers(self):
         """

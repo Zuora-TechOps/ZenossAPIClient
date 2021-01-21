@@ -5,15 +5,21 @@ from zenossapi.routers.events import EventsRouter
 host = 'zenoss'
 user = 'admin'
 password = 'zenoss'
+collection_zone = 'cz1'
+api_key = 'a594730e-293c-4d32-915e-edf43aa9bae8'
 
 
 class TestZenossClient(object):
 
     def test_client_init(self):
         zc = zapi.Client(host=host, user=user, password=password)
-        assert zc.api_host == host
         assert zc.api_url == 'https://{0}/zport/dmd'.format(host)
-        assert zc.api_user == user
+        assert 'authorization' in zc.api_headers
+        assert zc.ssl_verify
+
+        zc = zapi.Client(host=host, collection_zone=collection_zone, api_key=api_key)
+        assert zc.api_url == 'https://{0}/{1}/zport/dmd'.format(host, collection_zone)
+        assert 'z-api-key' in zc.api_headers
         assert zc.ssl_verify
 
     def test_client_get_routers(self):
