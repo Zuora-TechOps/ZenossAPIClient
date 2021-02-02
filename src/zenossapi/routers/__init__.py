@@ -48,7 +48,7 @@ class ZenossRouter(object):
             )
         except ConnectionError as e:
             raise ZenossAPIClientError(
-                'Unable to connect to Zenoss server {0}'.format(self.api_url)
+                'Unable to connect to Zenoss server {0}: {1}'.format(self.api_url, e)
             )
 
         if response.ok:
