@@ -6,6 +6,8 @@ Zenoss Events/IncidentManagementRouter
 
 from zenossapi.routers import ZenossRouter
 
+__router__ = 'IncidentManagementRouter'
+
 
 class IncidentManagementRouter(ZenossRouter):
     """
